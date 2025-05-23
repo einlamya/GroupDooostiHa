@@ -141,21 +141,31 @@
         .ad-card .expanded-content {
             display: none;
         }
+        .ad-card.expanded .content {
+            display: none;
+        }
         .ad-card.expanded .expanded-content {
             display: block;
             margin-top: 10px;
         }
-        .ad-card button {
-            background-color: #008CBA;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .contact-link {
+            display: flex;
+            align-items: center;
             margin-top: 10px;
         }
-        .ad-card button:hover {
-            background-color: #007399;
+        .contact-link img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .contact-link a {
+            color: #008CBA;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+        .contact-link a:hover {
+            text-decoration: underline;
         }
         @media (max-width: 768px) {
             .category {
@@ -364,6 +374,7 @@
         let db;
         let isFirebaseReady = false;
         const imageMap = new Map();
+        let userInfo = null;
 
         // تنظیم تقویم شمسی
         document.addEventListener('DOMContentLoaded', () => {
@@ -408,15 +419,13 @@
         };
 
         // نمایش جزئیات توی همون کارت
-        function toggleCard(card, data, type, imageUrl) {
+        function toggleCard(card, data, type, imageUrl, userId, userName) {
             const isExpanded = card.classList.contains('expanded');
             const content = card.querySelector('.content');
             const expandedContent = card.querySelector('.expanded-content');
-            const button = card.querySelector('button');
 
             if (!isExpanded) {
                 card.classList.add('expanded');
-                button.textContent = 'کمتر';
                 content.style.display = 'none';
                 expandedContent.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : '';
                 if (type === 'travel') {
@@ -460,9 +469,29 @@
                         <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
                     `;
                 }
+
+                // اضافه کردن لینک تماس با آگهی‌دهنده
+                if (userId && userId !== 'unknown') {
+                    expandedContent.innerHTML += `
+                        <div class="contact-link">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
+                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
+                        </div>
+                    `;
+                } else if (data.phone) {
+                    expandedContent.innerHTML += `
+                        <div class="contact-link">
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
+                            <a href="https://t.me/+${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <a href="https://t.me/+${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
+                        </div>
+                    `;
+                } else {
+                    expandedContent.innerHTML += `<p>اطلاعات تماس موجود نیست!</p>`;
+                }
             } else {
                 card.classList.remove('expanded');
-                button.textContent = 'بیشتر';
                 content.style.display = 'block';
                 expandedContent.innerHTML = '';
             }
@@ -494,6 +523,9 @@
         tg.ready();
         tg.MainButton.setText("بستن").show().onClick(() => tg.close());
 
+        // گرفتن اطلاعات کاربر
+        userInfo = tg.initDataUnsafe.user || {};
+
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', async () => {
             if (!isFirebaseReady) {
@@ -517,7 +549,8 @@
                 owner: document.getElementById('travel-owner').value,
                 phone: document.getElementById('travel-phone').value,
                 description: document.getElementById('travel-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
+                userId: userInfo ? userInfo.id : 'unknown',
+                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
 
@@ -553,7 +586,8 @@
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
                 description: document.getElementById('event-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
+                userId: userInfo ? userInfo.id : 'unknown',
+                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
 
@@ -582,7 +616,8 @@
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
+                userId: userInfo ? userInfo.id : 'unknown',
+                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
 
@@ -626,13 +661,8 @@
                                 <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
                             </div>
                             <div class="expanded-content"></div>
-                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'travel', ${JSON.stringify(imageUrl)})">بیشتر</button>
                         `;
-                        adDiv.onclick = (e) => {
-                            if (!e.target.tagName === 'BUTTON') {
-                                toggleCard(adDiv, data, 'travel', imageUrl);
-                            }
-                        };
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'travel', imageUrl, data.userId, data.userName);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -661,13 +691,8 @@
                                 <strong>مکان:</strong> ${data.location || 'نامشخص'}
                             </div>
                             <div class="expanded-content"></div>
-                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'event')">بیشتر</button>
                         `;
-                        adDiv.onclick = (e) => {
-                            if (!e.target.tagName === 'BUTTON') {
-                                toggleCard(adDiv, data, 'event');
-                            }
-                        };
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'event', null, data.userId, data.userName);
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -698,13 +723,8 @@
                                 <strong>قیمت:</strong> ${data.price || 'نامشخص'}
                             </div>
                             <div class="expanded-content"></div>
-                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'shop', ${JSON.stringify(imageUrl)})">بیشتر</button>
                         `;
-                        adDiv.onclick = (e) => {
-                            if (!e.target.tagName === 'BUTTON') {
-                                toggleCard(adDiv, data, 'shop', imageUrl);
-                            }
-                        };
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'shop', imageUrl, data.userId, data.userName);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
