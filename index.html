@@ -151,7 +151,8 @@
         .contact-link {
             display: flex;
             align-items: center;
-            margin-top: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
         }
         .contact-link img {
             width: 30px;
@@ -474,16 +475,16 @@
                 if (userId && userId !== 'unknown') {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
+                            <a href="https://t.me/+${data.phone || ''}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                            <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
+                            <a href="https://t.me/+${data.phone || ''}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
                 } else if (data.phone) {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
                             <a href="https://t.me/+${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
                             <a href="https://t.me/+${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
