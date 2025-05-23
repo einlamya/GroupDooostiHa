@@ -1,12 +1,11 @@
-<!DOCTYPE html>
 <html lang="fa">
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مینی‌اپ گروه‌ها</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -147,59 +146,61 @@
         <button id="submit-travel">✅ ثبت آگهی</button>
     </div>
     <script>
+        // تنظیمات Firebase - اینجا کلیدهای خودت رو بذار
         const firebaseConfig = {
-  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-  authDomain: "doostihagroupapp.firebaseapp.com",
-  projectId: "doostihagroupapp",
-  storageBucket: "doostihagroupapp.firebasestorage.app",
-  messagingSenderId: "746714229972",
-  appId: "1:746714229972:web:72a26758b58e2ede009f41"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+            apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+            authDomain: "doostihagroupapp.firebaseapp.com",
+            projectId: "doostihagroupapp",
+            storageBucket: "doostihagroupapp.firebasestorage.app",
+            messagingSenderId: "746714229972",
+            appId: "1:746714229972:web:72a26758b58e2ede009f41"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        
+        // تنظیمات Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.MainButton.setText("بستن").show().onClick(() => tg.close());
 
+        // نمایش بخش‌های مختلف
         function showSection(section) {
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
             } else {
                 document.getElementById('travel-form').style.display = 'none';
-                alert(`بخش ${section} هنوز آماده نیست!`);
+                alert(`بخش ${section === 'event' ? 'ایونت‌ها' : 'فروشگاه'} هنوز آماده نیست!`);
             }
         }
 
+        // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', () => {
-    const travelData = {
-        photo: document.getElementById('travel-photo').value || 'ندارد',
-        organizer: document.getElementById('travel-organizer').value,
-        type: document.getElementById('travel-type').value,
-        leader: document.getElementById('travel-leader').value,
-        vehicle: document.getElementById('travel-vehicle').value,
-        origin: document.getElementById('travel-origin').value,
-        destination: document.getElementById('travel-destination').value,
-        startDate: document.getElementById('travel-start-date').value,
-        returnDate: document.getElementById('travel-return-date').value,
-        capacity: document.getElementById('travel-capacity').value,
-        cost: document.getElementById('travel-cost').value,
-        extraCost: document.getElementById('travel-extra-cost').value,
-        card: document.getElementById('travel-card').value,
-        cardOwner: document.getElementById('travel-card-owner').value,
-        phone: document.getElementById('travel-phone').value,
-        description: document.getElementById('travel-description').value
-    };
-    db.collection('travels').add(travelData)
-        .then(() => {
-            alert('آگهی سفر ثبت شد!');
-            document.getElementById('travel-form').reset();
-        })
-        .catch(error => {
-            alert('خطا: ' + error.message);
-        });
-});
+            const travelData = {
+                photo: document.getElementById('travel-photo').value || 'ندارد',
+                organizer: document.getElementById('travel-organizer').value,
+                type: document.getElementById('travel-type').value,
+                leader: document.getElementById('travel-leader').value,
+                vehicle: document.getElementById('travel-vehicle').value,
+                origin: document.getElementById('travel-origin').value,
+                destination: document.getElementById('travel-destination').value,
+                startDate: document.getElementById('travel-start-date').value,
+                returnDate: document.getElementById('travel-return-date').value,
+                capacity: document.getElementById('travel-capacity').value,
+                cost: document.getElementById('travel-cost').value,
+                extraCost: document.getElementById('travel-extra-cost').value,
+                card: document.getElementById('travel-card').value,
+                cardOwner: document.getElementById('travel-card-owner').value,
+                phone: document.getElementById('travel-phone').value,
+                description: document.getElementById('travel-description').value
+            };
+            db.collection('travels').add(travelData)
+                .then(() => {
+                    alert('آگهی سفر ثبت شد!');
+                    document.getElementById('travel-form').reset();
+                })
+                .catch(error => {
+                    alert('خطا: ' + error.message);
+                });
         });
     </script>
 </body>
