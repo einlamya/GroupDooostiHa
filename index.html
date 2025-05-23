@@ -149,23 +149,31 @@
     <script>
         let db;
 
+        // تابع برای چک کردن لود اسکریپت Firebase
+        function checkFirebaseScript() {
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase script not loaded!');
+                alert('خطا: سرور در دسترس نیست! لطفاً اینترنت یا VPN را بررسی کنید.');
+                return false;
+            }
+            console.log('Firebase script loaded!');
+            return true;
+        }
+
         // تابع برای initialize کردن Firebase
         function initFirebase() {
             return new Promise((resolve, reject) => {
-                if (typeof firebase === 'undefined') {
-                    console.error('Firebase failed to load!');
-                    alert('خطا: اتصال به سرور برقرار نشد! لطفاً اتصال اینترنت را بررسی کنید.');
+                if (!checkFirebaseScript()) {
                     reject('Firebase not loaded');
                     return;
                 }
-                console.log('Firebase script loaded!');
                 const firebaseConfig = {
-                   apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-  		   authDomain: "doostihagroupapp.firebaseapp.com",
-		   projectId: "doostihagroupapp",
-		   storageBucket: "doostihagroupapp.firebasestorage.app",
-		   messagingSenderId: "746714229972",
-		   appId: "1:746714229972:web:72a26758b58e2ede009f41"
+		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+		  authDomain: "doostihagroupapp.firebaseapp.com",
+		  projectId: "doostihagroupapp",
+		  storageBucket: "doostihagroupapp.firebasestorage.app",
+		  messagingSenderId: "746714229972",
+		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
                 };
                 try {
                     firebase.initializeApp(firebaseConfig);
@@ -186,7 +194,7 @@
                 initFirebase().catch(error => {
                     console.error('Failed to initialize Firebase:', error);
                 });
-            }, 2000); // تأخیر 2 ثانیه برای اطمینان از لود اسکریپت‌ها
+            }, 2000); // تأخیر 2 ثانیه
         });
 
         // تنظیمات Telegram Web App
@@ -206,8 +214,8 @@
 
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', () => {
-            if (typeof db === 'undefined') {
-                alert('خطا: اتصال به سرور برقرار نشد! لطفاً دوباره امتحان کنید.');
+            if (!checkFirebaseScript() || typeof db === 'undefined') {
+                alert('خطا: سرور در دسترس نیست! لطفاً دوباره امتحان کنید.');
                 console.error('Database not initialized');
                 return;
             }
