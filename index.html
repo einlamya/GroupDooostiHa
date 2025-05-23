@@ -23,16 +23,21 @@
         }
         .category {
             margin: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* دو ستون */
+            gap: 10px; /* فاصله بین دکمه‌ها */
+            justify-items: center;
         }
         .category button {
             padding: 15px 30px;
-            margin: 10px;
             font-size: 18px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
+            width: 100%; /* عرض کامل در ستون */
+            box-sizing: border-box;
         }
         .category button:hover {
             background-color: #45a049;
@@ -44,6 +49,9 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            max-width: 33%; /* یک‌سوم عرض صفحه */
+            margin-left: auto;
+            margin-right: auto;
         }
         #travel-ads, #event-ads, #shop-ads {
             display: none;
@@ -53,6 +61,9 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-top: 20px;
             text-align: right;
+            max-width: 33%; /* یک‌سوم عرض صفحه */
+            margin-left: auto;
+            margin-right: auto;
         }
         .form-group {
             margin: 10px 0;
@@ -87,6 +98,15 @@
         }
         .ad-item:last-child {
             border-bottom: none;
+        }
+        /* برای موبایل، دکمه‌ها زیر هم */
+        @media (max-width: 768px) {
+            .category {
+                grid-template-columns: 1fr; /* یک ستون در موبایل */
+            }
+            #travel-form, #event-form, #shop-form, #ad-creator, #travel-ads, #event-ads, #shop-ads {
+                max-width: 100%; /* عرض کامل در موبایل */
+            }
         }
     </style>
 </head>
@@ -177,7 +197,7 @@
 
         // Initialize Firebase
         const firebaseConfig = {
-		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+  		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
 		  storageBucket: "doostihagroupapp.firebasestorage.app",
@@ -206,12 +226,15 @@
 
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
+                document.getElementById('travel-ads').style.display = 'block';
                 loadTravelAds();
             } else if (section === 'event') {
                 document.getElementById('event-form').style.display = 'block';
+                document.getElementById('event-ads').style.display = 'block';
                 loadEventAds();
             } else if (section === 'shop') {
                 document.getElementById('shop-form').style.display = 'block';
+                document.getElementById('shop-ads').style.display = 'block';
                 loadShopAds();
             } else if (section === 'ad-creator') {
                 document.getElementById('ad-creator').style.display = 'block';
