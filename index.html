@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مینی‌اپ گروه‌ها</title>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="loadFallbackFirebase()"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" onerror="loadFallbackFirebase()"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,9 +18,8 @@
             margin: 0;
             padding: 20px;
         }
-        h1 {
+        h1, h2 {
             color: #333;
-            font-size: 24px;
         }
         .category {
             margin: 20px;
@@ -36,12 +37,22 @@
         .category button:hover {
             background-color: #45a049;
         }
-        #travel-form {
+        #travel-form, #event-form, #shop-form, #ad-creator {
             display: none;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #travel-ads, #event-ads, #shop-ads {
+            display: none;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            text-align: right;
         }
         .form-group {
             margin: 10px 0;
@@ -58,16 +69,24 @@
             border-radius: 5px;
             font-size: 14px;
         }
-        #submit-travel {
+        #submit-travel, #submit-event, #submit-shop {
             background-color: #008CBA;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
-        #submit-travel:hover {
+        #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
             background-color: #007399;
+        }
+        .ad-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+        .ad-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -76,143 +95,99 @@
     <div class="category">
         <button onclick="showSection('event')">🫂 ایونت‌ها</button>
         <button onclick="showSection('shop')">🛍️ فروشگاه</button>
-        <button onclick="showSection('travel')">🏕️ سفرها</button>
+        <button onclick="showSection('travel')">🏕️ گروه‌های سفر</button>
+        <button onclick="showSection('ad-creator')">📝 آگهی‌ساز</button>
     </div>
     <form id="travel-form">
         <h2>📝 ثبت آگهی سفر</h2>
         <div class="form-group">
-            <label>📷 تصویر (لینک یا آپلود بعداً):</label>
-            <input type="text" id="travel-photo" placeholder="لینک تصویر (اختیاری)">
-        </div>
-        <div class="form-group">
-            <label>👤 نام برگزارکننده (نام تور):</label>
-            <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت‌گردی">
-        </div>
-        <div class="form-group">
-            <label>🌍 نوع سفر (داخلی/خارجی):</label>
-            <input type="text" id="travel-type" placeholder="مثلاً: داخلی">
-        </div>
-        <div class="form-group">
-            <label>🧑‍✈️ نام لیدر:</label>
-            <input type="text" id="travel-leader" placeholder="مثلاً: علی محمدی">
-        </div>
-        <div class="form-group">
-            <label>🚗 وسیله سفر:</label>
-            <input type="text" id="travel-vehicle" placeholder="مثلاً: اتوبوس">
-        </div>
-        <div class="form-group">
-            <label>📍 مبدا:</label>
-            <input type="text" id="travel-origin" placeholder="مثلاً: تهران">
-        </div>
-        <div class="form-group">
             <label>🏞️ مقصد:</label>
             <input type="text" id="travel-destination" placeholder="مثلاً: شیراز">
         </div>
+        <button type="button" id="submit-travel">✅ ثبت آگهی</button>
+    </form>
+    <form id="event-form">
+        <h2>📅 ثبت ایونت</h2>
         <div class="form-group">
-            <label>📅 تاریخ رفت:</label>
-            <input type="text" id="travel-start-date" placeholder="مثلاً: 1404/03/01">
+            <label>🎉 عنوان:</label>
+            <input type="text" id="event-title" placeholder="مثلاً: جشن تولد">
         </div>
         <div class="form-group">
-            <label>📅 تاریخ برگشت:</label>
-            <input type="text" id="travel-return-date" placeholder="مثلاً: 1404/03/05">
+            <label>📅 تاریخ:</label>
+            <input type="text" id="event-date" placeholder="مثلاً: 1404/03/05">
         </div>
         <div class="form-group">
-            <label>🧍 ظرفیت باقی‌مانده:</label>
-            <input type="text" id="travel-capacity" placeholder="مثلاً: ۴ نفر">
+            <label>📍 مکان:</label>
+            <input type="text" id="event-location" placeholder="مثلاً: تهران، پارک ملت">
+        </div>
+        <div class="form-group">
+            <label>🧍 ظرفیت:</label>
+            <input type="text" id="event-capacity" placeholder="مثلاً: 50 نفر">
         </div>
         <div class="form-group">
             <label>💰 هزینه:</label>
-            <input type="text" id="travel-cost" placeholder="مثلاً: ۱,۰۰۰,۰۰۰ تومان">
+            <input type="text" id="event-cost" placeholder="مثلاً: 500,000 تومان">
         </div>
-        <div class="form-group">
-            <label>💸 هزینه اضافی:</label>
-            <input type="text" id="travel-extra-cost" placeholder="مثلاً: ۲۰۰,۰۰۰ تومان">
-        </div>
-        <div class="form-group">
-            <label>💳 شماره کارت:</label>
-            <input type="text" id="travel-card" placeholder="مثلاً: 1234-5678-9012-3456">
-        </div>
-        <div class="form-group">
-            <label>👤 به نام (صاحب حساب):</label>
-            <input type="text" id="travel-card-owner" placeholder="مثلاً: علی محمدی">
-        </div>
-        <div class="form-group">
-            <label>📞 تلفن هماهنگی:</label>
-            <input type="text" id="travel-phone" placeholder="مثلاً: 09123456789">
-        </div>
-        <div class="form-group">
-            <label>📝 توضیحات بیشتر:</label>
-            <textarea id="travel-description" placeholder="توضیحات سفر..."></textarea>
-        </div>
-        <button type="button" id="submit-travel">✅ ثبت آگهی</button>
+        <button type="button" id="submit-event">✅ ثبت ایونت</button>
     </form>
-    <script>
+    <form id="shop-form">
+        <h2>🛍️ ثبت محصول</h2>
+        <div class="form-group">
+            <label>📦 وضعیت محصول:</label>
+            <input type="text" id="shop-status" placeholder="مثلاً: نو / کارکرده / در حد نو">
+        </div>
+        <div class="form-group">
+            <label>🏷️ برند:</label>
+            <input type="text" id="shop-brand" placeholder="مثلاً: سامسونگ">
+        </div>
+        <div class="form-group">
+            <label>📅 سال تولید:</label>
+            <input type="text" id="shop-year" placeholder="مثلاً: 1399">
+        </div>
+        <div class="form-group">
+            <label>💰 قیمت:</label>
+            <input type="text" id="shop-price" placeholder="مثلاً: 2,000,000 تومان">
+        </div>
+        <div class="form-group">
+            <label>📝 توضیحات:</label>
+            <textarea id="shop-description" placeholder="توضیحات محصول..."></textarea>
+        </div>
+        <button type="button" id="submit-shop">✅ ثبت محصول</button>
+    </form>
+    <div id="ad-creator">
+        <h2>📝 آگهی‌ساز</h2>
+        <p>برای ساخت آگهی، به ربات تلگرام ما بروید و فرم را پر کنید:</p>
+        <a href="https://t.me/DooostiHa_bot" target="_blank">باز کردن ربات (@MyGroupsBot)</a>
+    </div>
+    <div id="travel-ads">
+        <h2>🏕️ آگهی‌های گروه‌های سفر</h2>
+        <div id="travel-ads-list"></div>
+    </div>
+    <div id="event-ads">
+        <h2>🫂 آگهی‌های ایونت‌ها</h2>
+        <div id="event-ads-list"></div>
+    </div>
+    <div id="shop-ads">
+        <h2>🛍️ آگهی‌های فروشگاه</h2>
+        <div id="shop-ads-list"></div>
+    </div>
+    <script type="module">
         let db;
-        let firebaseLoadAttempts = 0;
+        let isFirebaseReady = false;
 
-        // تابع برای لود CDN جایگزین
-        function loadFallbackFirebase() {
-            if (firebaseLoadAttempts >= 1) return; // جلوگیری از تلاش‌های مکرر
-            firebaseLoadAttempts++;
-            console.warn('Main Firebase CDN failed, trying fallback CDN...');
-            const appScript = document.createElement('script');
-            appScript.src = 'https://unpkg.com/firebase@8.10.1/app.js';
-            appScript.onerror = () => console.error('Fallback Firebase app failed to load!');
-            document.head.appendChild(appScript);
-
-            const firestoreScript = document.createElement('script');
-            firestoreScript.src = 'https://unpkg.com/firebase@8.10.1/firestore.js';
-            firestoreScript.onerror = () => console.error('Fallback Firebase firestore failed to load!');
-            document.head.appendChild(firestoreScript);
-        }
-
-        // تابع برای چک کردن لود اسکریپت Firebase
-        function checkFirebaseScript() {
-            if (typeof firebase === 'undefined') {
-                console.error('Firebase script not loaded!');
-                alert('خطا: سرور در دسترس نیست! لطفاً اینترنت، VPN یا نسخه تلگرام را بررسی کنید.');
-                return false;
-            }
-            console.log('Firebase script loaded!');
-            return true;
-        }
-
-        // تابع برای initialize کردن Firebase
-        function initFirebase() {
-            return new Promise((resolve, reject) => {
-                if (!checkFirebaseScript()) {
-                    reject('Firebase not loaded');
-                    return;
-                }
-                const firebaseConfig = {
+        // Initialize Firebase
+        const firebaseConfig = {
 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
 		  storageBucket: "doostihagroupapp.firebasestorage.app",
 		  messagingSenderId: "746714229972",
 		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
-                };
-                try {
-                    firebase.initializeApp(firebaseConfig);
-                    db = firebase.firestore();
-                    console.log('Firebase initialized successfully!');
-                    resolve();
-                } catch (error) {
-                    console.error('Firebase initialization failed:', error);
-                    alert('خطا در اتصال به سرور: ' + error.message);
-                    reject(error);
-                }
-            });
-        }
+        };
 
-        // لود Firebase با تأخیر
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                initFirebase().catch(error => {
-                    console.error('Failed to initialize Firebase:', error);
-                });
-            }, 2000); // تأخیر 2 ثانیه
-        });
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        isFirebaseReady = true;
 
         // تنظیمات Telegram Web App
         const tg = window.Telegram.WebApp;
@@ -221,49 +196,186 @@
 
         // نمایش بخش‌های مختلف
         function showSection(section) {
+            document.getElementById('travel-form').style.display = 'none';
+            document.getElementById('event-form').style.display = 'none';
+            document.getElementById('shop-form').style.display = 'none';
+            document.getElementById('ad-creator').style.display = 'none';
+            document.getElementById('travel-ads').style.display = 'none';
+            document.getElementById('event-ads').style.display = 'none';
+            document.getElementById('shop-ads').style.display = 'none';
+
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
-            } else {
-                document.getElementById('travel-form').style.display = 'none';
-                alert(`بخش ${section === 'event' ? 'ایونت‌ها' : 'فروشگاه'} هنوز آماده نیست!`);
+                loadTravelAds();
+            } else if (section === 'event') {
+                document.getElementById('event-form').style.display = 'block';
+                loadEventAds();
+            } else if (section === 'shop') {
+                document.getElementById('shop-form').style.display = 'block';
+                loadShopAds();
+            } else if (section === 'ad-creator') {
+                document.getElementById('ad-creator').style.display = 'block';
             }
         }
 
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', () => {
-            if (!checkFirebaseScript() || typeof db === 'undefined') {
-                alert('خطا: سرور در دسترس نیست! لطفاً دوباره امتحان کنید.');
-                console.error('Database not initialized');
+            const travelData = {
+                destination: document.getElementById('travel-destination').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (!isFirebaseReady) {
+                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
                 return;
             }
-            const travelData = {
-                photo: document.getElementById('travel-photo').value || 'ندارد',
-                organizer: document.getElementById('travel-organizer').value,
-                type: document.getElementById('travel-type').value,
-                leader: document.getElementById('travel-leader').value,
-                vehicle: document.getElementById('travel-vehicle').value,
-                origin: document.getElementById('travel-origin').value,
-                destination: document.getElementById('travel-destination').value,
-                startDate: document.getElementById('travel-start-date').value,
-                returnDate: document.getElementById('travel-return-date').value,
-                capacity: document.getElementById('travel-capacity').value,
-                cost: document.getElementById('travel-cost').value,
-                extraCost: document.getElementById('travel-extra-cost').value,
-                card: document.getElementById('travel-card').value,
-                cardOwner: document.getElementById('travel-card-owner').value,
-                phone: document.getElementById('travel-phone').value,
-                description: document.getElementById('travel-description').value
-            };
-            db.collection('travels').add(travelData)
+
+            addDoc(collection(db, 'travels'), travelData)
                 .then(() => {
                     alert('آگهی سفر ثبت شد!');
                     document.getElementById('travel-form').reset();
+                    loadTravelAds();
                 })
                 .catch(error => {
                     alert('خطا: ' + error.message);
-                    console.error('Error saving data:', error);
+                    console.error('Error saving travel data:', error);
                 });
         });
+
+        // ثبت ایونت
+        document.getElementById('submit-event').addEventListener('click', () => {
+            const eventData = {
+                title: document.getElementById('event-title').value,
+                date: document.getElementById('event-date').value,
+                location: document.getElementById('event-location').value,
+                capacity: document.getElementById('event-capacity').value,
+                cost: document.getElementById('event-cost').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (!isFirebaseReady) {
+                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
+                return;
+            }
+
+            addDoc(collection(db, 'events'), eventData)
+                .then(() => {
+                    alert('ایونت ثبت شد!');
+                    document.getElementById('event-form').reset();
+                    loadEventAds();
+                })
+                .catch(error => {
+                    alert('خطا: ' + error.message);
+                    console.error('Error saving event data:', error);
+                });
+        });
+
+        // ثبت محصول
+        document.getElementById('submit-shop').addEventListener('click', () => {
+            const shopData = {
+                status: document.getElementById('shop-status').value,
+                brand: document.getElementById('shop-brand').value,
+                year: document.getElementById('shop-year').value,
+                price: document.getElementById('shop-price').value,
+                description: document.getElementById('shop-description').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (!isFirebaseReady) {
+                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
+                return;
+            }
+
+            addDoc(collection(db, 'shop'), shopData)
+                .then(() => {
+                    alert('محصول ثبت شد!');
+                    document.getElementById('shop-form').reset();
+                    loadShopAds();
+                })
+                .catch(error => {
+                    alert('خطا: ' + error.message);
+                    console.error('Error saving shop data:', error);
+                });
+        });
+
+        // بارگذاری آگهی‌های سفر
+        async function loadTravelAds() {
+            const travelAdsList = document.getElementById('travel-ads-list');
+            travelAdsList.innerHTML = '';
+            try {
+                const travelsSnapshot = await getDocs(collection(db, 'travels'));
+                if (travelsSnapshot.empty) {
+                    travelAdsList.innerHTML = '<p>آگهی سفری یافت نشد.</p>';
+                } else {
+                    travelsSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const adDiv = document.createElement('div');
+                        adDiv.className = 'ad-item';
+                        adDiv.innerHTML = `
+                            مقصد: ${data.destination || 'نامشخص'}<br>
+                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                        `;
+                        travelAdsList.appendChild(adDiv);
+                    });
+                }
+            } catch (error) {
+                travelAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + error.message + '</p>';
+            }
+        }
+
+        // بارگذاری آگهی‌های ایونت
+        async function loadEventAds() {
+            const eventAdsList = document.getElementById('event-ads-list');
+            eventAdsList.innerHTML = '';
+            try {
+                const eventsSnapshot = await getDocs(collection(db, 'events'));
+                if (eventsSnapshot.empty) {
+                    eventAdsList.innerHTML = '<p>آگهی ایونتی یافت نشد.</p>';
+                } else {
+                    eventsSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const adDiv = document.createElement('div');
+                        adDiv.className = 'ad-item';
+                        adDiv.innerHTML = `
+                            عنوان: ${data.title || 'نامشخص'}<br>
+                            تاریخ: ${data.date || 'نامشخص'}<br>
+                            مکان: ${data.location || 'نامشخص'}<br>
+                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                        `;
+                        eventAdsList.appendChild(adDiv);
+                    });
+                }
+            } catch (error) {
+                eventAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + error.message + '</p>';
+            }
+        }
+
+        // بارگذاری آگهی‌های فروشگاه
+        async function loadShopAds() {
+            const shopAdsList = document.getElementById('shop-ads-list');
+            shopAdsList.innerHTML = '';
+            try {
+                const shopSnapshot = await getDocs(collection(db, 'shop'));
+                if (shopSnapshot.empty) {
+                    shopAdsList.innerHTML = '<p>آگهی فروشگاهی یافت نشد.</p>';
+                } else {
+                    shopSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        const adDiv = document.createElement('div');
+                        adDiv.className = 'ad-item';
+                        adDiv.innerHTML = `
+                            برند: ${data.brand || 'نامشخص'}<br>
+                            وضعیت: ${data.status || 'نامشخص'}<br>
+                            قیمت: ${data.price || 'نامشخص'}<br>
+                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                        `;
+                        shopAdsList.appendChild(adDiv);
+                    });
+                }
+            } catch (error) {
+                shopAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + error.message + '</p>';
+            }
+        }
     </script>
 </body>
 </html>
