@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مینی‌اپ گروه‌ها</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="loadFallbackFirebase()"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" onerror="loadFallbackFirebase()"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -148,12 +148,29 @@
     </form>
     <script>
         let db;
+        let firebaseLoadAttempts = 0;
+
+        // تابع برای لود CDN جایگزین
+        function loadFallbackFirebase() {
+            if (firebaseLoadAttempts >= 1) return; // جلوگیری از تلاش‌های مکرر
+            firebaseLoadAttempts++;
+            console.warn('Main Firebase CDN failed, trying fallback CDN...');
+            const appScript = document.createElement('script');
+            appScript.src = 'https://unpkg.com/firebase@8.10.1/app.js';
+            appScript.onerror = () => console.error('Fallback Firebase app failed to load!');
+            document.head.appendChild(appScript);
+
+            const firestoreScript = document.createElement('script');
+            firestoreScript.src = 'https://unpkg.com/firebase@8.10.1/firestore.js';
+            firestoreScript.onerror = () => console.error('Fallback Firebase firestore failed to load!');
+            document.head.appendChild(firestoreScript);
+        }
 
         // تابع برای چک کردن لود اسکریپت Firebase
         function checkFirebaseScript() {
             if (typeof firebase === 'undefined') {
                 console.error('Firebase script not loaded!');
-                alert('خطا: سرور در دسترس نیست! لطفاً اینترنت یا VPN را بررسی کنید.');
+                alert('خطا: سرور در دسترس نیست! لطفاً اینترنت، VPN یا نسخه تلگرام را بررسی کنید.');
                 return false;
             }
             console.log('Firebase script loaded!');
