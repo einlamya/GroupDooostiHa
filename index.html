@@ -150,20 +150,28 @@
         // دیباگ برای چک کردن لود Firebase
         if (typeof firebase === 'undefined') {
             console.error('Firebase failed to load!');
+            alert('خطا: Firebase لود نشد! لطفاً دوباره امتحان کنید.');
         } else {
             console.log('Firebase loaded successfully!');
         }
 
         // تنظیمات Firebase - اینجا کلیدهای خودت رو بذار
-        const firebaseConfig = {  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+        const firebaseConfig = {
+          apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
  	  authDomain: "doostihagroupapp.firebaseapp.com",
-	  projectId: "doostihagroupapp",
+ 	  projectId: "doostihagroupapp",
 	  storageBucket: "doostihagroupapp.firebasestorage.app",
 	  messagingSenderId: "746714229972",
 	  appId: "1:746714229972:web:72a26758b58e2ede009f41"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            console.log('Firebase initialized successfully!');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            alert('خطا در اتصال به Firebase: ' + error.message);
+        }
 
         // تنظیمات Telegram Web App
         const tg = window.Telegram.WebApp;
@@ -182,6 +190,10 @@
 
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', () => {
+            if (typeof db === 'undefined') {
+                alert('خطا: دیتابیس لود نشده است!');
+                return;
+            }
             const travelData = {
                 photo: document.getElementById('travel-photo').value || 'ندارد',
                 organizer: document.getElementById('travel-organizer').value,
