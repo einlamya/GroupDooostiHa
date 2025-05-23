@@ -149,10 +149,11 @@
     <script>
         let db;
         let firebaseLoadAttempts = 0;
+        let isFirebaseReady = false;
 
         // تابع برای لود CDN جایگزین
         function loadFallbackFirebase() {
-            if (firebaseLoadAttempts >= 1) return; // جلوگیری از تلاش‌های مکرر
+            if (firebaseLoadAttempts >= 1) return;
             firebaseLoadAttempts++;
             console.warn('Main Firebase CDN failed, trying fallback CDN...');
             const appScript = document.createElement('script');
@@ -170,7 +171,6 @@
         function checkFirebaseScript() {
             if (typeof firebase === 'undefined') {
                 console.error('Firebase script not loaded!');
-                alert('خطا: سرور در دسترس نیست! لطفاً اینترنت، VPN یا نسخه تلگرام را بررسی کنید.');
                 return false;
             }
             console.log('Firebase script loaded!');
@@ -185,7 +185,7 @@
                     return;
                 }
                 const firebaseConfig = {
-		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+ 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
 		  storageBucket: "doostihagroupapp.firebasestorage.app",
@@ -196,6 +196,7 @@
                     firebase.initializeApp(firebaseConfig);
                     db = firebase.firestore();
                     console.log('Firebase initialized successfully!');
+                    isFirebaseReady = true;
                     resolve();
                 } catch (error) {
                     console.error('Firebase initialization failed:', error);
@@ -205,13 +206,46 @@
             });
         }
 
+        // ذخیره موقت در localStorage
+        function saveToLocalStorage(travelData) {
+            let pendingTravels = JSON.parse(localStorage.getItem('pendingTravels') || '[]');
+            pendingTravels.push(travelData);
+            localStorage.setItem('pendingTravels', JSON.stringify(pendingTravels));
+            console.log('Data saved to localStorage:', travelData);
+            alert('آگهی موقتاً ذخیره شد! به محض اتصال به سرور ثبت می‌شود.');
+        }
+
+        // ارسال داده‌های localStorage به Firestore
+        function syncLocalStorageToFirestore() {
+            if (!isFirebaseReady) return;
+            let pendingTravels = JSON.parse(localStorage.getItem('pendingTravels') || '[]');
+            if (pendingTravels.length === 0) return;
+
+            pendingTravels.forEach((travelData, index) => {
+                db.collection('travels').add(travelData)
+                    .then(() => {
+                        console.log('Synced travel data to Firestore:', travelData);
+                        pendingTravels.splice(index, 1);
+                        localStorage.setItem('pendingTravels', JSON.stringify(pendingTravels));
+                        alert('آگهی‌های ذخیره‌شده با موفقیت به سرور ارسال شدند!');
+                    })
+                    .catch(error => {
+                        console.error('Error syncing data:', error);
+                    });
+            });
+        }
+
         // لود Firebase با تأخیر
         window.addEventListener('load', () => {
             setTimeout(() => {
-                initFirebase().catch(error => {
-                    console.error('Failed to initialize Firebase:', error);
-                });
-            }, 2000); // تأخیر 2 ثانیه
+                initFirebase()
+                    .then(() => {
+                        setInterval(syncLocalStorageToFirestore, 5000); // هر ۵ ثانیه چک کن
+                    })
+                    .catch(error => {
+                        console.error('Failed to initialize Firebase:', error);
+                    });
+            }, 2000);
         });
 
         // تنظیمات Telegram Web App
@@ -231,11 +265,6 @@
 
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', () => {
-            if (!checkFirebaseScript() || typeof db === 'undefined') {
-                alert('خطا: سرور در دسترس نیست! لطفاً دوباره امتحان کنید.');
-                console.error('Database not initialized');
-                return;
-            }
             const travelData = {
                 photo: document.getElementById('travel-photo').value || 'ندارد',
                 organizer: document.getElementById('travel-organizer').value,
@@ -252,8 +281,16 @@
                 card: document.getElementById('travel-card').value,
                 cardOwner: document.getElementById('travel-card-owner').value,
                 phone: document.getElementById('travel-phone').value,
-                description: document.getElementById('travel-description').value
+                description: document.getElementById('travel-description').value,
+                timestamp: new Date().toISOString()
             };
+
+            if (!checkFirebaseScript() || !isFirebaseReady) {
+                saveToLocalStorage(travelData);
+                document.getElementById('travel-form').reset();
+                return;
+            }
+
             db.collection('travels').add(travelData)
                 .then(() => {
                     alert('آگهی سفر ثبت شد!');
@@ -262,6 +299,7 @@
                 .catch(error => {
                     alert('خطا: ' + error.message);
                     console.error('Error saving data:', error);
+                    saveToLocalStorage(travelData);
                 });
         });
     </script>
