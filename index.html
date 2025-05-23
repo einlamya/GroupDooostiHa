@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مینی‌اپ گروه‌ها</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="loadFallbackFirebase()"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" onerror="loadFallbackFirebase()"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -147,106 +145,14 @@
         <button type="button" id="submit-travel">✅ ثبت آگهی</button>
     </form>
     <script>
-        let db;
-        let firebaseLoadAttempts = 0;
-        let isFirebaseReady = false;
-
-        // تابع برای لود CDN جایگزین
-        function loadFallbackFirebase() {
-            if (firebaseLoadAttempts >= 1) return;
-            firebaseLoadAttempts++;
-            console.warn('Main Firebase CDN failed, trying fallback CDN...');
-            const appScript = document.createElement('script');
-            appScript.src = 'https://unpkg.com/firebase@8.10.1/app.js';
-            appScript.onerror = () => console.error('Fallback Firebase app failed to load!');
-            document.head.appendChild(appScript);
-
-            const firestoreScript = document.createElement('script');
-            firestoreScript.src = 'https://unpkg.com/firebase@8.10.1/firestore.js';
-            firestoreScript.onerror = () => console.error('Fallback Firebase firestore failed to load!');
-            document.head.appendChild(firestoreScript);
-        }
-
-        // تابع برای چک کردن لود اسکریپت Firebase
-        function checkFirebaseScript() {
-            if (typeof firebase === 'undefined') {
-                console.error('Firebase script not loaded!');
-                return false;
-            }
-            console.log('Firebase script loaded!');
-            return true;
-        }
-
-        // تابع برای initialize کردن Firebase
-        function initFirebase() {
-            return new Promise((resolve, reject) => {
-                if (!checkFirebaseScript()) {
-                    reject('Firebase not loaded');
-                    return;
-                }
-                const firebaseConfig = {
- 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-		  authDomain: "doostihagroupapp.firebaseapp.com",
-		  projectId: "doostihagroupapp",
-		  storageBucket: "doostihagroupapp.firebasestorage.app",
-		  messagingSenderId: "746714229972",
-		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
-                };
-                try {
-                    firebase.initializeApp(firebaseConfig);
-                    db = firebase.firestore();
-                    console.log('Firebase initialized successfully!');
-                    isFirebaseReady = true;
-                    resolve();
-                } catch (error) {
-                    console.error('Firebase initialization failed:', error);
-                    alert('خطا در اتصال به سرور: ' + error.message);
-                    reject(error);
-                }
-            });
-        }
-
-        // ذخیره موقت در localStorage
+        // ذخیره داده‌ها در localStorage
         function saveToLocalStorage(travelData) {
-            let pendingTravels = JSON.parse(localStorage.getItem('pendingTravels') || '[]');
-            pendingTravels.push(travelData);
-            localStorage.setItem('pendingTravels', JSON.stringify(pendingTravels));
+            let travels = JSON.parse(localStorage.getItem('travels') || '[]');
+            travels.push(travelData);
+            localStorage.setItem('travels', JSON.stringify(travels));
             console.log('Data saved to localStorage:', travelData);
-            alert('آگهی موقتاً ذخیره شد! به محض اتصال به سرور ثبت می‌شود.');
+            alert('آگهی با موفقیت در دستگاه شما ذخیره شد! لطفاً بعداً برای ارسال به سرور اقدام کنید.');
         }
-
-        // ارسال داده‌های localStorage به Firestore
-        function syncLocalStorageToFirestore() {
-            if (!isFirebaseReady) return;
-            let pendingTravels = JSON.parse(localStorage.getItem('pendingTravels') || '[]');
-            if (pendingTravels.length === 0) return;
-
-            pendingTravels.forEach((travelData, index) => {
-                db.collection('travels').add(travelData)
-                    .then(() => {
-                        console.log('Synced travel data to Firestore:', travelData);
-                        pendingTravels.splice(index, 1);
-                        localStorage.setItem('pendingTravels', JSON.stringify(pendingTravels));
-                        alert('آگهی‌های ذخیره‌شده با موفقیت به سرور ارسال شدند!');
-                    })
-                    .catch(error => {
-                        console.error('Error syncing data:', error);
-                    });
-            });
-        }
-
-        // لود Firebase با تأخیر
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                initFirebase()
-                    .then(() => {
-                        setInterval(syncLocalStorageToFirestore, 5000); // هر ۵ ثانیه چک کن
-                    })
-                    .catch(error => {
-                        console.error('Failed to initialize Firebase:', error);
-                    });
-            }, 2000);
-        });
 
         // تنظیمات Telegram Web App
         const tg = window.Telegram.WebApp;
@@ -285,22 +191,8 @@
                 timestamp: new Date().toISOString()
             };
 
-            if (!checkFirebaseScript() || !isFirebaseReady) {
-                saveToLocalStorage(travelData);
-                document.getElementById('travel-form').reset();
-                return;
-            }
-
-            db.collection('travels').add(travelData)
-                .then(() => {
-                    alert('آگهی سفر ثبت شد!');
-                    document.getElementById('travel-form').reset();
-                })
-                .catch(error => {
-                    alert('خطا: ' + error.message);
-                    console.error('Error saving data:', error);
-                    saveToLocalStorage(travelData);
-                });
+            saveToLocalStorage(travelData);
+            document.getElementById('travel-form').reset();
         });
     </script>
 </body>
