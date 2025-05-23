@@ -54,7 +54,7 @@
             margin-top: 10px;
             font-weight: 700;
         }
-        #travel-form, #event-form, #shop-form, #ad-details {
+        #travel-form, #event-form, #shop-form {
             display: none;
             background-color: white;
             padding: 20px;
@@ -94,7 +94,7 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-        #submit-travel, #submit-event, #submit-shop, #back-button {
+        #submit-travel, #submit-event, #submit-shop {
             background-color: #008CBA;
             color: white;
             padding: 10px 20px;
@@ -103,7 +103,7 @@
             cursor: pointer;
             margin: 5px;
         }
-        #submit-travel:hover, #submit-event:hover, #submit-shop:hover, #back-button:hover {
+        #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
             background-color: #007399;
         }
         .ad-card {
@@ -118,9 +118,13 @@
             text-align: right;
             vertical-align: top;
             position: relative;
+            transition: all 0.3s ease;
         }
-        .ad-card:hover {
-            background-color: #f9f9f9;
+        .ad-card.expanded {
+            width: 400px;
+            height: auto;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
         .ad-card img {
             width: 50px;
@@ -134,12 +138,24 @@
         .ad-card .content {
             margin-left: 60px;
         }
-        #ad-details img {
-            width: 100%;
-            max-height: 200px;
-            object-fit: cover;
+        .ad-card .expanded-content {
+            display: none;
+        }
+        .ad-card.expanded .expanded-content {
+            display: block;
+            margin-top: 10px;
+        }
+        .ad-card button {
+            background-color: #008CBA;
+            color: white;
+            padding: 5px 10px;
+            border: none;
             border-radius: 5px;
-            margin-bottom: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .ad-card button:hover {
+            background-color: #007399;
         }
         @media (max-width: 768px) {
             .category {
@@ -149,11 +165,14 @@
                 width: 50%;
                 max-width: 200px;
             }
-            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads, #ad-details {
+            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads {
                 max-width: 100%;
             }
             .ad-card {
                 width: 100%;
+            }
+            .ad-card.expanded {
+                width: 90%;
             }
             body {
                 font-family: 'Vazir', Arial, sans-serif;
@@ -165,8 +184,8 @@
     <h1>🧳 گروه دوستی‌ها</h1>
     <div class="category">
         <button onclick="showSection('event')">🫂 ایونت‌ها</button>
-        <button onclick="showSection('shop')">🛍️ فروشگاه</button>
         <button onclick="showSection('travel')">🏕️ گروه‌های سفر</button>
+        <button onclick="showSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <form id="travel-form">
@@ -325,11 +344,6 @@
         </div>
         <button type="button" id="submit-shop">✅ ثبت محصول</button>
     </form>
-    <div id="ad-details">
-        <h2>جزئیات آگهی</h2>
-        <div id="ad-details-content"></div>
-        <button id="back-button" onclick="showSection(currentSection)">بازگشت</button>
-    </div>
     <div id="travel-ads">
         <h2>🏕️ آگهی‌های گروه‌های سفر</h2>
         <div id="travel-ads-list"></div>
@@ -349,12 +363,11 @@
 
         let db;
         let isFirebaseReady = false;
-        let currentSection = '';
-        const imageMap = new Map(); // برای ذخیره موقت تصاویر
+        const imageMap = new Map();
 
         // تنظیم تقویم شمسی
         document.addEventListener('DOMContentLoaded', () => {
-            const today = new persianDate().format('YYYY/MM/DD'); // تاریخ امروز شمسی
+            const today = new persianDate().format('YYYY/MM/DD');
             document.querySelectorAll('.persian-date').forEach(input => {
                 new persianDatepicker({
                     element: input,
@@ -372,14 +385,12 @@
 
         // تعریف تابع showSection
         window.showSection = function(section) {
-            currentSection = section;
             document.getElementById('travel-form').style.display = 'none';
             document.getElementById('event-form').style.display = 'none';
             document.getElementById('shop-form').style.display = 'none';
             document.getElementById('travel-ads').style.display = 'none';
             document.getElementById('event-ads').style.display = 'none';
             document.getElementById('shop-ads').style.display = 'none';
-            document.getElementById('ad-details').style.display = 'none';
 
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
@@ -396,56 +407,64 @@
             }
         };
 
-        // نمایش جزئیات آگهی
-        function showAdDetails(data, type, imageUrl) {
-            document.getElementById('travel-ads').style.display = 'none';
-            document.getElementById('event-ads').style.display = 'none';
-            document.getElementById('shop-ads').style.display = 'none';
-            document.getElementById('ad-details').style.display = 'block';
+        // نمایش جزئیات توی همون کارت
+        function toggleCard(card, data, type, imageUrl) {
+            const isExpanded = card.classList.contains('expanded');
+            const content = card.querySelector('.content');
+            const expandedContent = card.querySelector('.expanded-content');
+            const button = card.querySelector('button');
 
-            const content = document.getElementById('ad-details-content');
-            content.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : '';
-
-            if (type === 'travel') {
-                content.innerHTML += `
-                    <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
-                    <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
-                    <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
-                    <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
-                    <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
-                    <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
-                    <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
-                    <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
-                    <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                    <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                    <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
-                    <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
-                    <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
-                    <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
-                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                `;
-            } else if (type === 'event') {
-                content.innerHTML += `
-                    <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
-                    <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
-                    <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
-                    <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
-                    <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                    <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                `;
-            } else if (type === 'shop') {
-                content.innerHTML += `
-                    <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
-                    <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
-                    <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
-                    <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
-                    <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
-                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                `;
+            if (!isExpanded) {
+                card.classList.add('expanded');
+                button.textContent = 'کمتر';
+                content.style.display = 'none';
+                expandedContent.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : '';
+                if (type === 'travel') {
+                    expandedContent.innerHTML += `
+                        <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
+                        <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
+                        <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
+                        <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
+                        <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
+                        <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
+                        <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
+                        <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
+                        <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                        <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                        <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
+                        <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
+                        <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
+                        <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
+                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                    `;
+                } else if (type === 'event') {
+                    expandedContent.innerHTML += `
+                        <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
+                        <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
+                        <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
+                        <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
+                        <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                        <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                    `;
+                } else if (type === 'shop') {
+                    expandedContent.innerHTML += `
+                        <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
+                        <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
+                        <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
+                        <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
+                        <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
+                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                    `;
+                }
+            } else {
+                card.classList.remove('expanded');
+                button.textContent = 'بیشتر';
+                content.style.display = 'block';
+                expandedContent.innerHTML = '';
             }
         }
 
@@ -606,8 +625,14 @@
                                 <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
                                 <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
                             </div>
+                            <div class="expanded-content"></div>
+                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'travel', ${JSON.stringify(imageUrl)})">بیشتر</button>
                         `;
-                        adDiv.onclick = () => showAdDetails(data, 'travel', imageUrl);
+                        adDiv.onclick = (e) => {
+                            if (!e.target.tagName === 'BUTTON') {
+                                toggleCard(adDiv, data, 'travel', imageUrl);
+                            }
+                        };
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -635,8 +660,14 @@
                                 <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
                                 <strong>مکان:</strong> ${data.location || 'نامشخص'}
                             </div>
+                            <div class="expanded-content"></div>
+                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'event')">بیشتر</button>
                         `;
-                        adDiv.onclick = () => showAdDetails(data, 'event');
+                        adDiv.onclick = (e) => {
+                            if (!e.target.tagName === 'BUTTON') {
+                                toggleCard(adDiv, data, 'event');
+                            }
+                        };
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -666,8 +697,14 @@
                                 <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
                                 <strong>قیمت:</strong> ${data.price || 'نامشخص'}
                             </div>
+                            <div class="expanded-content"></div>
+                            <button onclick="event.stopPropagation(); toggleCard(this.parentElement, ${JSON.stringify(data)}, 'shop', ${JSON.stringify(imageUrl)})">بیشتر</button>
                         `;
-                        adDiv.onclick = () => showAdDetails(data, 'shop', imageUrl);
+                        adDiv.onclick = (e) => {
+                            if (!e.target.tagName === 'BUTTON') {
+                                toggleCard(adDiv, data, 'shop', imageUrl);
+                            }
+                        };
                         shopAdsList.appendChild(adDiv);
                     });
                 }
