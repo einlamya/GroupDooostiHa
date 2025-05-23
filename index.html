@@ -9,9 +9,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@persian-tools/persian-fonts@1.0.0/dist/IRANSans.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
     <style>
         body {
-            font-family: 'IRANSans', 'Vazir', Arial, sans-serif; /* IRANSans برای دسکتاپ، Vazir برای گوشی */
+            font-family: 'IRANSans', 'Vazir', Arial, sans-serif;
             text-align: center;
             direction: rtl;
             background-color: #f0f0f0;
@@ -24,10 +27,10 @@
         .category {
             margin: 20px auto;
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* دو ستون */
-            gap: 10px; /* فاصله بین دکمه‌ها */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             justify-items: center;
-            max-width: 600px; /* محدود کردن عرض کلی دکمه‌ها برای وسط‌چین شدن */
+            max-width: 600px;
         }
         .category button {
             padding: 15px 30px;
@@ -37,8 +40,8 @@
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
-            width: 30%; /* 30 درصد عرض ستون */
-            max-width: 165px; /* 10 درصد بزرگ‌تر */
+            width: 30%;
+            max-width: 165px;
             box-sizing: border-box;
         }
         .category button:hover {
@@ -51,14 +54,14 @@
             margin-top: 10px;
             font-weight: 700;
         }
-        #travel-form, #event-form, #shop-form {
+        #travel-form, #event-form, #shop-form, #ad-details {
             display: none;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            max-width: 33%; /* یک‌سوم عرض صفحه */
+            max-width: 33%;
             margin-left: auto;
             margin-right: auto;
         }
@@ -70,7 +73,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-top: 20px;
             text-align: right;
-            max-width: 33%; /* یک‌سوم عرض صفحه */
+            max-width: 33%;
             margin-left: auto;
             margin-right: auto;
         }
@@ -91,7 +94,7 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-        #submit-travel, #submit-event, #submit-shop {
+        #submit-travel, #submit-event, #submit-shop, #back-button {
             background-color: #008CBA;
             color: white;
             padding: 10px 20px;
@@ -100,7 +103,7 @@
             cursor: pointer;
             margin: 5px;
         }
-        #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
+        #submit-travel:hover, #submit-event:hover, #submit-shop:hover, #back-button:hover {
             background-color: #007399;
         }
         .ad-card {
@@ -114,27 +117,46 @@
             cursor: pointer;
             text-align: right;
             vertical-align: top;
+            position: relative;
         }
         .ad-card:hover {
             background-color: #f9f9f9;
         }
-        /* برای موبایل، دکمه‌ها و کارت‌ها */
+        .ad-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            position: absolute;
+            left: 15px;
+            top: 15px;
+        }
+        .ad-card .content {
+            margin-left: 60px;
+        }
+        #ad-details img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
         @media (max-width: 768px) {
             .category {
-                grid-template-columns: 1fr; /* یک ستون در موبایل */
+                grid-template-columns: 1fr;
             }
             .category button {
-                width: 50%; /* عرض دکمه در موبایل */
+                width: 50%;
                 max-width: 200px;
             }
-            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads {
-                max-width: 100%; /* عرض کامل در موبایل */
+            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads, #ad-details {
+                max-width: 100%;
             }
             .ad-card {
                 width: 100%;
             }
             body {
-                font-family: 'Vazir', Arial, sans-serif; /* فونت Vazir برای موبایل */
+                font-family: 'Vazir', Arial, sans-serif;
             }
         }
     </style>
@@ -188,11 +210,11 @@
         </div>
         <div class="form-group">
             <label>تاریخ رفت:</label>
-            <input type="date" id="travel-departure" value="2025-05-23">
+            <input type="text" id="travel-departure" class="persian-date">
         </div>
         <div class="form-group">
             <label>تاریخ برگشت:</label>
-            <input type="date" id="travel-return" value="2025-05-23">
+            <input type="text" id="travel-return" class="persian-date">
         </div>
         <div class="form-group">
             <label>ظرفیت باقی‌مانده:</label>
@@ -243,11 +265,11 @@
         </div>
         <div class="form-group">
             <label>تاریخ شروع:</label>
-            <input type="date" id="event-date" value="2025-05-23">
+            <input type="text" id="event-date" class="persian-date">
         </div>
         <div class="form-group">
             <label>تاریخ پایان:</label>
-            <input type="date" id="event-end-date" value="2025-05-23">
+            <input type="text" id="event-end-date" class="persian-date">
         </div>
         <div class="form-group">
             <label>مکان:</label>
@@ -303,6 +325,11 @@
         </div>
         <button type="button" id="submit-shop">✅ ثبت محصول</button>
     </form>
+    <div id="ad-details">
+        <h2>جزئیات آگهی</h2>
+        <div id="ad-details-content"></div>
+        <button id="back-button" onclick="showSection(currentSection)">بازگشت</button>
+    </div>
     <div id="travel-ads">
         <h2>🏕️ آگهی‌های گروه‌های سفر</h2>
         <div id="travel-ads-list"></div>
@@ -322,15 +349,37 @@
 
         let db;
         let isFirebaseReady = false;
+        let currentSection = '';
+        const imageMap = new Map(); // برای ذخیره موقت تصاویر
 
-        // تعریف تابع showSection قبل از استفاده
+        // تنظیم تقویم شمسی
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new persianDate().format('YYYY/MM/DD'); // تاریخ امروز شمسی
+            document.querySelectorAll('.persian-date').forEach(input => {
+                new persianDatepicker({
+                    element: input,
+                    initialValue: today,
+                    format: 'YYYY/MM/DD',
+                    autoClose: true,
+                    toolbox: {
+                        calendarSwitch: {
+                            enabled: false
+                        }
+                    }
+                });
+            });
+        });
+
+        // تعریف تابع showSection
         window.showSection = function(section) {
+            currentSection = section;
             document.getElementById('travel-form').style.display = 'none';
             document.getElementById('event-form').style.display = 'none';
             document.getElementById('shop-form').style.display = 'none';
             document.getElementById('travel-ads').style.display = 'none';
             document.getElementById('event-ads').style.display = 'none';
             document.getElementById('shop-ads').style.display = 'none';
+            document.getElementById('ad-details').style.display = 'none';
 
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
@@ -346,6 +395,59 @@
                 loadShopAds();
             }
         };
+
+        // نمایش جزئیات آگهی
+        function showAdDetails(data, type, imageUrl) {
+            document.getElementById('travel-ads').style.display = 'none';
+            document.getElementById('event-ads').style.display = 'none';
+            document.getElementById('shop-ads').style.display = 'none';
+            document.getElementById('ad-details').style.display = 'block';
+
+            const content = document.getElementById('ad-details-content');
+            content.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : '';
+
+            if (type === 'travel') {
+                content.innerHTML += `
+                    <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
+                    <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
+                    <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
+                    <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
+                    <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
+                    <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
+                    <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
+                    <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
+                    <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                    <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                    <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
+                    <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
+                    <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
+                    <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
+                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                `;
+            } else if (type === 'event') {
+                content.innerHTML += `
+                    <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
+                    <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
+                    <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
+                    <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
+                    <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                    <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                `;
+            } else if (type === 'shop') {
+                content.innerHTML += `
+                    <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
+                    <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
+                    <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
+                    <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
+                    <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
+                    <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                    <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                `;
+            }
+        }
 
         // مقداردهی Firebase
         async function initFirebase() {
@@ -396,9 +498,15 @@
                 owner: document.getElementById('travel-owner').value,
                 phone: document.getElementById('travel-phone').value,
                 description: document.getElementById('travel-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
                 timestamp: new Date().toISOString()
             };
+
+            const imageFile = document.getElementById('travel-image').files[0];
+            if (imageFile) {
+                const imageUrl = URL.createObjectURL(imageFile);
+                imageMap.set(travelData.timestamp, imageUrl);
+            }
 
             try {
                 await addDoc(collection(db, 'travels'), travelData);
@@ -426,7 +534,7 @@
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
                 description: document.getElementById('event-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
                 timestamp: new Date().toISOString()
             };
 
@@ -455,9 +563,15 @@
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
-                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown',
                 timestamp: new Date().toISOString()
             };
+
+            const imageFile = document.getElementById('shop-image').files[0];
+            if (imageFile) {
+                const imageUrl = URL.createObjectURL(imageFile);
+                imageMap.set(shopData.timestamp, imageUrl);
+            }
 
             try {
                 await addDoc(collection(db, 'shop'), shopData);
@@ -483,21 +597,17 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        const imageUrl = imageMap.get(data.timestamp);
                         adDiv.innerHTML = `
-                            <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
-                            <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
-                            <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
-                            <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
+                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            <div class="content">
+                                <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
+                                <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
+                                <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
+                                <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
+                            </div>
                         `;
-                        adDiv.onclick = () => {
-                            if (data.userId && data.userId !== 'unknown') {
-                                tg.openTelegramLink(`https://t.me/${data.userId}`);
-                            } else if (data.phone) {
-                                window.location.href = `https://t.me/+${data.phone}`;
-                            } else {
-                                alert('اطلاعات تماس موجود نیست!');
-                            }
-                        };
+                        adDiv.onclick = () => showAdDetails(data, 'travel', imageUrl);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -520,17 +630,13 @@
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
                         adDiv.innerHTML = `
-                            <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
-                            <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
-                            <strong>مکان:</strong> ${data.location || 'نامشخص'}
+                            <div class="content">
+                                <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
+                                <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
+                                <strong>مکان:</strong> ${data.location || 'نامشخص'}
+                            </div>
                         `;
-                        adDiv.onclick = () => {
-                            if (data.userId && data.userId !== 'unknown') {
-                                tg.openTelegramLink(`https://t.me/${data.userId}`);
-                            } else {
-                                alert('اطلاعات تماس موجود نیست!');
-                            }
-                        };
+                        adDiv.onclick = () => showAdDetails(data, 'event');
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -552,18 +658,16 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        const imageUrl = imageMap.get(data.timestamp);
                         adDiv.innerHTML = `
-                            <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
-                            <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
-                            <strong>قیمت:</strong> ${data.price || 'نامشخص'}
+                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            <div class="content">
+                                <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
+                                <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
+                                <strong>قیمت:</strong> ${data.price || 'نامشخص'}
+                            </div>
                         `;
-                        adDiv.onclick = () => {
-                            if (data.userId && data.userId !== 'unknown') {
-                                tg.openTelegramLink(`https://t.me/${data.userId}`);
-                            } else {
-                                alert('اطلاعات تماس موجود نیست!');
-                            }
-                        };
+                        adDiv.onclick = () => showAdDetails(data, 'shop', imageUrl);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
