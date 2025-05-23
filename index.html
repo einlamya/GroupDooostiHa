@@ -37,7 +37,7 @@
             background-color: #4CAF50;
             color: white;
             width: 30%; /* 30 درصد عرض ستون */
-            max-width: 165px; /* 10 درصد بزرگ‌تر (150px + 10%) */
+            max-width: 165px; /* 10 درصد بزرگ‌تر */
             box-sizing: border-box;
         }
         .category button:hover {
@@ -50,7 +50,7 @@
             margin-top: 10px;
             font-weight: 700;
         }
-        #travel-form, #event-form, #shop-form, #ad-creator {
+        #travel-form, #event-form, #shop-form {
             display: none;
             background-color: white;
             padding: 20px;
@@ -75,18 +75,20 @@
         }
         .form-group {
             margin: 10px 0;
+            text-align: right;
         }
         .form-group label {
             display: block;
             font-size: 16px;
             margin-bottom: 5px;
         }
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 90%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 14px;
+            box-sizing: border-box;
         }
         #submit-travel, #submit-event, #submit-shop {
             background-color: #008CBA;
@@ -100,14 +102,22 @@
         #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
             background-color: #007399;
         }
-        .ad-item {
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
+        .ad-card {
+            display: inline-block;
+            background-color: #fff;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            width: 200px;
+            cursor: pointer;
+            text-align: right;
+            vertical-align: top;
         }
-        .ad-item:last-child {
-            border-bottom: none;
+        .ad-card:hover {
+            background-color: #f9f9f9;
         }
-        /* برای موبایل، دکمه‌ها زیر هم */
+        /* برای موبایل، دکمه‌ها و کارت‌ها */
         @media (max-width: 768px) {
             .category {
                 grid-template-columns: 1fr; /* یک ستون در موبایل */
@@ -116,8 +126,11 @@
                 width: 50%; /* عرض دکمه در موبایل */
                 max-width: 200px;
             }
-            #travel-form, #event-form, #shop-form, #ad-creator, #travel-ads, #event-ads, #shop-ads {
+            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads {
                 max-width: 100%; /* عرض کامل در موبایل */
+            }
+            .ad-card {
+                width: 100%;
             }
         }
     </style>
@@ -128,70 +141,155 @@
         <button onclick="showSection('event')">🫂 ایونت‌ها</button>
         <button onclick="showSection('shop')">🛍️ فروشگاه</button>
         <button onclick="showSection('travel')">🏕️ گروه‌های سفر</button>
-        <button onclick="showSection('ad-creator')">📝 آگهی‌ساز</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <form id="travel-form">
-        <h2>📝 ثبت آگهی سفر</h2>
+        <h2>🏕️ ثبت آگهی گروه‌های سفر</h2>
         <div class="form-group">
-            <label>🏞️ مقصد:</label>
+            <label>ارسال تصویر:</label>
+            <input type="file" id="travel-image" accept="image/*">
+            <button type="button" onclick="document.getElementById('travel-image').value = ''; alert('تصویر رد شد!');">رد کردن</button>
+        </div>
+        <div class="form-group">
+            <label>نام برگزارکننده (نام تور):</label>
+            <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت گردی">
+        </div>
+        <div class="form-group">
+            <label>نوع سفر:</label>
+            <select id="travel-type">
+                <option value="داخلی">داخلی</option>
+                <option value="خارجی">خارجی</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>نام لیدر:</label>
+            <input type="text" id="travel-leader" placeholder="مثلاً: علی محمدی">
+        </div>
+        <div class="form-group">
+            <label>وسیله سفر:</label>
+            <select id="travel-vehicle">
+                <option value="خودرو شخصی">خودرو شخصی</option>
+                <option value="اتوبوس">اتوبوس</option>
+                <option value="هواپیما">هواپیما</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>مبدا:</label>
+            <input type="text" id="travel-origin" placeholder="مثلاً: تهران">
+        </div>
+        <div class="form-group">
+            <label>مقصد:</label>
             <input type="text" id="travel-destination" placeholder="مثلاً: شیراز">
+        </div>
+        <div class="form-group">
+            <label>تاریخ رفت:</label>
+            <input type="text" id="travel-departure" placeholder="مثلاً: 1404/03/05">
+        </div>
+        <div class="form-group">
+            <label>تاریخ برگشت:</label>
+            <input type="text" id="travel-return" placeholder="مثلاً: 1404/03/07">
+        </div>
+        <div class="form-group">
+            <label>ظرفیت باقی‌مانده:</label>
+            <input type="text" id="travel-capacity" placeholder="مثلاً: 4 نفر">
+        </div>
+        <div class="form-group">
+            <label>هزینه:</label>
+            <input type="text" id="travel-cost" placeholder="مثلاً: 1,000,000 تومان">
+        </div>
+        <div class="form-group">
+            <label>هزینه اضافی:</label>
+            <input type="text" id="travel-extra-cost" placeholder="مثلاً: 200,000 تومان">
+        </div>
+        <div class="form-group">
+            <label>شماره کارت واریزی:</label>
+            <input type="text" id="travel-card" placeholder="مثلاً: 1234-5678-9012">
+        </div>
+        <div class="form-group">
+            <label>به نام:</label>
+            <input type="text" id="travel-owner" placeholder="مثلاً: علی محمدی">
+        </div>
+        <div class="form-group">
+            <label>تلفن هماهنگی:</label>
+            <input type="text" id="travel-phone" placeholder="مثلاً: 09123456789">
+        </div>
+        <div class="form-group">
+            <label>توضیحات بیشتر:</label>
+            <textarea id="travel-description" placeholder="مثلاً: تور شامل صبحانه است..."></textarea>
         </div>
         <button type="button" id="submit-travel">✅ ثبت آگهی</button>
     </form>
     <form id="event-form">
-        <h2>📅 ثبت ایونت</h2>
+        <h2>🫂 ثبت آگهی ایونت</h2>
         <div class="form-group">
-            <label>🎉 عنوان:</label>
-            <input type="text" id="event-title" placeholder="مثلاً: جشن تولد">
+            <label>عنوان:</label>
+            <select id="event-title">
+                <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
+                <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
+                <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
+                <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
+                <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
+                <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
+                <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
+                <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
+                <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
+            </select>
         </div>
         <div class="form-group">
-            <label>📅 تاریخ:</label>
+            <label>تاریخ:</label>
             <input type="text" id="event-date" placeholder="مثلاً: 1404/03/05">
         </div>
         <div class="form-group">
-            <label>📍 مکان:</label>
+            <label>مکان:</label>
             <input type="text" id="event-location" placeholder="مثلاً: تهران، پارک ملت">
         </div>
         <div class="form-group">
-            <label>🧍 ظرفیت:</label>
+            <label>ظرفیت:</label>
             <input type="text" id="event-capacity" placeholder="مثلاً: 50 نفر">
         </div>
         <div class="form-group">
-            <label>💰 هزینه:</label>
+            <label>هزینه:</label>
             <input type="text" id="event-cost" placeholder="مثلاً: 500,000 تومان">
         </div>
         <button type="button" id="submit-event">✅ ثبت ایونت</button>
     </form>
     <form id="shop-form">
-        <h2>🛍️ ثبت محصول</h2>
+        <h2>🛍️ ثبت آگهی فروشگاه</h2>
         <div class="form-group">
-            <label>📦 وضعیت محصول:</label>
-            <input type="text" id="shop-status" placeholder="مثلاً: نو / کارکرده / در حد نو">
+            <label>ارسال تصویر:</label>
+            <input type="file" id="shop-image" accept="image/*">
+            <button type="button" onclick="document.getElementById('shop-image').value = ''; alert('تصویر رد شد!');">رد کردن</button>
         </div>
         <div class="form-group">
-            <label>🏷️ برند:</label>
+            <label>وضعیت محصول:</label>
+            <select id="shop-status">
+                <option value="نو">نو</option>
+                <option value="کارکرده">کارکرده</option>
+                <option value="در حد نو">در حد نو</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>برند کالا:</label>
             <input type="text" id="shop-brand" placeholder="مثلاً: سامسونگ">
         </div>
         <div class="form-group">
-            <label>📅 سال تولید:</label>
+            <label>مدل:</label>
+            <input type="text" id="shop-model" placeholder="مثلاً: Galaxy S21">
+        </div>
+        <div class="form-group">
+            <label>سال تولید:</label>
             <input type="text" id="shop-year" placeholder="مثلاً: 1399">
         </div>
         <div class="form-group">
-            <label>💰 قیمت:</label>
+            <label>قیمت:</label>
             <input type="text" id="shop-price" placeholder="مثلاً: 2,000,000 تومان">
         </div>
         <div class="form-group">
-            <label>📝 توضیحات:</label>
-            <textarea id="shop-description" placeholder="توضیحات محصول..."></textarea>
+            <label>توضیحات بیشتر:</label>
+            <textarea id="shop-description" placeholder="مثلاً: با گارانتی..."></textarea>
         </div>
         <button type="button" id="submit-shop">✅ ثبت محصول</button>
     </form>
-    <div id="ad-creator">
-        <h2>📝 آگهی‌ساز</h2>
-        <p>برای ساخت آگهی، به ربات تلگرام ما بروید و فرم را پر کنید:</p>
-        <a href="https://t.me/DooostiHa_bot" target="_blank">باز کردن ربات (@DooostiHa_bot)</a>
-    </div>
     <div id="travel-ads">
         <h2>🏕️ آگهی‌های گروه‌های سفر</h2>
         <div id="travel-ads-list"></div>
@@ -217,7 +315,6 @@
             document.getElementById('travel-form').style.display = 'none';
             document.getElementById('event-form').style.display = 'none';
             document.getElementById('shop-form').style.display = 'none';
-            document.getElementById('ad-creator').style.display = 'none';
             document.getElementById('travel-ads').style.display = 'none';
             document.getElementById('event-ads').style.display = 'none';
             document.getElementById('shop-ads').style.display = 'none';
@@ -234,8 +331,6 @@
                 document.getElementById('shop-form').style.display = 'block';
                 document.getElementById('shop-ads').style.display = 'block';
                 loadShopAds();
-            } else if (section === 'ad-creator') {
-                document.getElementById('ad-creator').style.display = 'block';
             }
         };
 
@@ -273,7 +368,22 @@
             }
 
             const travelData = {
+                organizer: document.getElementById('travel-organizer').value,
+                type: document.getElementById('travel-type').value,
+                leader: document.getElementById('travel-leader').value,
+                vehicle: document.getElementById('travel-vehicle').value,
+                origin: document.getElementById('travel-origin').value,
                 destination: document.getElementById('travel-destination').value,
+                departure: document.getElementById('travel-departure').value,
+                return: document.getElementById('travel-return').value,
+                capacity: document.getElementById('travel-capacity').value,
+                cost: document.getElementById('travel-cost').value,
+                extraCost: document.getElementById('travel-extra-cost').value,
+                card: document.getElementById('travel-card').value,
+                owner: document.getElementById('travel-owner').value,
+                phone: document.getElementById('travel-phone').value,
+                description: document.getElementById('travel-description').value,
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
                 timestamp: new Date().toISOString()
             };
 
@@ -301,6 +411,7 @@
                 location: document.getElementById('event-location').value,
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
                 timestamp: new Date().toISOString()
             };
 
@@ -325,9 +436,11 @@
             const shopData = {
                 status: document.getElementById('shop-status').value,
                 brand: document.getElementById('shop-brand').value,
+                model: document.getElementById('shop-model').value,
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
+                userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown', // برای دایرکت
                 timestamp: new Date().toISOString()
             };
 
@@ -354,11 +467,22 @@
                     travelsSnapshot.forEach(doc => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-item';
+                        adDiv.className = 'ad-card';
                         adDiv.innerHTML = `
-                            مقصد: ${data.destination || 'نامشخص'}<br>
-                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                            <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
+                            <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
+                            <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
+                            <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
                         `;
+                        adDiv.onclick = () => {
+                            if (data.userId && data.userId !== 'unknown') {
+                                tg.openTelegramLink(`https://t.me/${data.userId}`);
+                            } else if (data.phone) {
+                                window.location.href = `https://t.me/+${data.phone}`;
+                            } else {
+                                alert('اطلاعات تماس موجود نیست!');
+                            }
+                        };
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -379,13 +503,19 @@
                     eventsSnapshot.forEach(doc => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-item';
+                        adDiv.className = 'ad-card';
                         adDiv.innerHTML = `
-                            عنوان: ${data.title || 'نامشخص'}<br>
-                            تاریخ: ${data.date || 'نامشخص'}<br>
-                            مکان: ${data.location || 'نامشخص'}<br>
-                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                            <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
+                            <strong>تاریخ:</strong> ${data.date || 'نامشخص'}<br>
+                            <strong>مکان:</strong> ${data.location || 'نامشخص'}
                         `;
+                        adDiv.onclick = () => {
+                            if (data.userId && data.userId !== 'unknown') {
+                                tg.openTelegramLink(`https://t.me/${data.userId}`);
+                            } else {
+                                alert('اطلاعات تماس موجود نیست!');
+                            }
+                        };
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -406,13 +536,19 @@
                     shopSnapshot.forEach(doc => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-item';
+                        adDiv.className = 'ad-card';
                         adDiv.innerHTML = `
-                            برند: ${data.brand || 'نامشخص'}<br>
-                            وضعیت: ${data.status || 'نامشخص'}<br>
-                            قیمت: ${data.price || 'نامشخص'}<br>
-                            تاریخ ثبت: ${new Date(data.timestamp).toLocaleString('fa-IR')}
+                            <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
+                            <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
+                            <strong>قیمت:</strong> ${data.price || 'نامشخص'}
                         `;
+                        adDiv.onclick = () => {
+                            if (data.userId && data.userId !== 'unknown') {
+                                tg.openTelegramLink(`https://t.me/${data.userId}`);
+                            } else {
+                                alert('اطلاعات تماس موجود نیست!');
+                            }
+                        };
                         shopAdsList.appendChild(adDiv);
                     });
                 }
