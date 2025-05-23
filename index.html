@@ -7,9 +7,10 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Vazir', Arial, sans-serif;
             text-align: center;
             direction: rtl;
             background-color: #f0f0f0;
@@ -20,11 +21,12 @@
             color: #333;
         }
         .category {
-            margin: 20px;
+            margin: 20px auto;
             display: grid;
             grid-template-columns: repeat(2, 1fr); /* دو ستون */
             gap: 10px; /* فاصله بین دکمه‌ها */
             justify-items: center;
+            max-width: 600px; /* محدود کردن عرض کلی دکمه‌ها برای وسط‌چین شدن */
         }
         .category button {
             padding: 15px 30px;
@@ -35,11 +37,18 @@
             background-color: #4CAF50;
             color: white;
             width: 30%; /* 30 درصد عرض ستون */
-            max-width: 150px; /* محدود کردن عرض حداکثری */
+            max-width: 165px; /* 10 درصد بزرگ‌تر (150px + 10%) */
             box-sizing: border-box;
         }
         .category button:hover {
             background-color: #45a049;
+        }
+        .slogan {
+            font-family: 'Vazir', sans-serif;
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 700;
         }
         #travel-form, #event-form, #shop-form, #ad-creator {
             display: none;
@@ -121,7 +130,7 @@
         <button onclick="showSection('travel')">🏕️ گروه‌های سفر</button>
         <button onclick="showSection('ad-creator')">📝 آگهی‌ساز</button>
     </div>
-    <p style="font-size: 16px; color: #666; margin-top: 10px;">دوستی‌ها از اینجا آغاز می‌شوند</p>
+    <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <form id="travel-form">
         <h2>📝 ثبت آگهی سفر</h2>
         <div class="form-group">
@@ -203,34 +212,8 @@
         let db;
         let isFirebaseReady = false;
 
-        // مقداردهی Firebase
-        async function initFirebase() {
-            const firebaseConfig = {
- 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-		  authDomain: "doostihagroupapp.firebaseapp.com",
-		  projectId: "doostihagroupapp",
-		  storageBucket: "doostihagroupapp.firebasestorage.app",
-		  messagingSenderId: "746714229972",
-		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
-            };
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                isFirebaseReady = true;
-                console.log("Firebase initialized successfully");
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-            }
-        }
-
-        // تنظیمات Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.MainButton.setText("بستن").show().onClick(() => tg.close());
-
-        // نمایش بخش‌های مختلف
-        function showSection(section) {
+        // تعریف تابع showSection قبل از استفاده
+        window.showSection = function(section) {
             document.getElementById('travel-form').style.display = 'none';
             document.getElementById('event-form').style.display = 'none';
             document.getElementById('shop-form').style.display = 'none';
@@ -254,7 +237,33 @@
             } else if (section === 'ad-creator') {
                 document.getElementById('ad-creator').style.display = 'block';
             }
+        };
+
+        // مقداردهی Firebase
+        async function initFirebase() {
+            const firebaseConfig = {
+		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+		  authDomain: "doostihagroupapp.firebaseapp.com",
+		  projectId: "doostihagroupapp",
+		  storageBucket: "doostihagroupapp.firebasestorage.app",
+		  messagingSenderId: "746714229972",
+		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
+            };
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                isFirebaseReady = true;
+                console.log("Firebase initialized successfully");
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+            }
         }
+
+        // تنظیمات Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.MainButton.setText("بستن").show().onClick(() => tg.close());
 
         // ثبت آگهی سفر
         document.getElementById('submit-travel').addEventListener('click', async () => {
