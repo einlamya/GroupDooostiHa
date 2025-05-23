@@ -78,7 +78,7 @@
         <button onclick="showSection('shop')">🛍️ فروشگاه</button>
         <button onclick="showSection('travel')">🏕️ سفرها</button>
     </div>
-    <div id="travel-form">
+    <form id="travel-form">
         <h2>📝 ثبت آگهی سفر</h2>
         <div class="form-group">
             <label>📷 تصویر (لینک یا آپلود بعداً):</label>
@@ -145,7 +145,7 @@
             <textarea id="travel-description" placeholder="توضیحات سفر..."></textarea>
         </div>
         <button id="submit-travel">✅ ثبت آگهی</button>
-    </div>
+    </form>
     <script>
         // دیباگ برای چک کردن لود Firebase
         if (typeof firebase === 'undefined') {
@@ -156,12 +156,12 @@
 
         // تنظیمات Firebase - اینجا کلیدهای خودت رو بذار
         const firebaseConfig = {
-           apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-	       authDomain: "doostihagroupapp.firebaseapp.com",
-	       projectId: "doostihagroupapp",
-	       storageBucket: "doostihagroupapp.firebasestorage.app",
-	       messagingSenderId: "746714229972",
-	       appId: "1:746714229972:web:72a26758b58e2ede009f41"
+  	  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
+ 	  authDomain: "doostihagroupapp.firebaseapp.com",
+ 	  projectId: "doostihagroupapp",
+ 	  storageBucket: "doostihagroupapp.firebasestorage.app",
+ 	  messagingSenderId: "746714229972",
+ 	  appId: "1:746714229972:web:72a26758b58e2ede009f41"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
