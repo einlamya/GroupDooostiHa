@@ -71,10 +71,15 @@
         }
         .form-card .content, .ad-card .content {
             display: block;
+            font-size: 20px;
+            text-align: center;
+            margin: 0 auto;
+            padding: 10px;
         }
         .form-card .form-content, .ad-card .expanded-content {
             display: none;
             margin-top: 10px;
+            text-align: right;
         }
         .form-card.expanded, .ad-card.expanded {
             height: auto;
@@ -141,12 +146,14 @@
             height: 50px;
             object-fit: cover;
             border-radius: 5px;
+            float: right;
+            margin-left: 10px;
         }
         .contact-link {
             display: flex;
             align-items: center;
-            margin-top: 15px;
             justify-content: flex-end;
+            margin-top: 15px;
         }
         .contact-link img {
             width: 30px;
@@ -196,7 +203,7 @@
         <button onclick="toggleSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
-    <div id="travel-form-card" class="form-card" style="display: none;">
+    <div id="travel-form-card" class="form-card">
         <div class="content">
             <strong>📝 ثبت آگهی تور</strong>
         </div>
@@ -280,7 +287,7 @@
             </form>
         </div>
     </div>
-    <div id="event-form-card" class="form-card" style="display: none;">
+    <div id="event-form-card" class="form-card">
         <div class="content">
             <strong>📝 ثبت آگهی ایونت</strong>
         </div>
@@ -330,7 +337,7 @@
             </form>
         </div>
     </div>
-    <div id="shop-form-card" class="form-card" style="display: none;">
+    <div id="shop-form-card" class="form-card">
         <div class="content">
             <strong>📝 ثبت آگهی فروشگاه</strong>
         </div>
@@ -461,11 +468,16 @@
         }
 
         // تابع برای toggle کردن کارت‌ها
-        function toggleCard(card, data, type, imageUrl, userId, userName, userAvatar) {
+        function toggleCard(card) {
             const isFormCard = card.classList.contains('form-card');
             const isExpanded = card.classList.contains('expanded');
             const content = card.querySelector('.content');
             const expandedContent = card.querySelector(isFormCard ? '.form-content' : '.expanded-content');
+
+            // جلوگیری از بستن با کلیک روی فیلدهای فرم
+            if (isFormCard && event.target.tagName !== 'DIV' && event.target.tagName !== 'STRONG') {
+                return;
+            }
 
             // بستن کارت باز قبلی
             if (currentExpandedCard && currentExpandedCard !== card) {
@@ -479,6 +491,13 @@
                 currentExpandedCard = card;
 
                 if (!isFormCard) {
+                    const data = card.data;
+                    const type = card.type;
+                    const imageUrl = card.imageUrl;
+                    const userId = card.userId;
+                    const userName = card.userName;
+                    const userAvatar = card.userAvatar;
+
                     expandedContent.innerHTML = '';
                     if (type === 'travel') {
                         expandedContent.innerHTML += `
@@ -557,8 +576,6 @@
         // مقداردهی Firebase
         async function initFirebase() {
             const firebaseConfig = {
-
-
 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
@@ -732,6 +749,12 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.data = data;
+                        adDiv.type = 'travel';
+                        adDiv.imageUrl = data.imageUrl;
+                        adDiv.userId = data.userId;
+                        adDiv.userName = data.userName;
+                        adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
                             <div class="content">
                                 <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
@@ -741,7 +764,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'travel', data.imageUrl, data.userId, data.userName, data.userAvatar);
+                        adDiv.onclick = () => toggleCard(adDiv);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -764,6 +787,11 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.data = data;
+                        adDiv.type = 'event';
+                        adDiv.userId = data.userId;
+                        adDiv.userName = data.userName;
+                        adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
                             <div class="content">
                                 <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
@@ -772,7 +800,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'event', null, data.userId, data.userName, data.userAvatar);
+                        adDiv.onclick = () => toggleCard(adDiv);
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -795,6 +823,12 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.data = data;
+                        adDiv.type = 'shop';
+                        adDiv.imageUrl = data.imageUrl;
+                        adDiv.userId = data.userId;
+                        adDiv.userName = data.userName;
+                        adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
                             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="content">
@@ -804,7 +838,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'shop', data.imageUrl, data.userId, data.userName, data.userAvatar);
+                        adDiv.onclick = () => toggleCard(adDiv);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
@@ -814,9 +848,21 @@
         }
 
         // تنظیم کلیک روی کارت فرم‌ها
-        document.getElementById('travel-form-card').onclick = () => toggleCard(document.getElementById('travel-form-card'));
-        document.getElementById('event-form-card').onclick = () => toggleCard(document.getElementById('event-form-card'));
-        document.getElementById('shop-form-card').onclick = () => toggleCard(document.getElementById('shop-form-card'));
+        document.getElementById('travel-form-card').onclick = (event) => {
+            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
+                toggleCard(document.getElementById('travel-form-card'));
+            }
+        };
+        document.getElementById('event-form-card').onclick = (event) => {
+            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
+                toggleCard(document.getElementById('event-form-card'));
+            }
+        };
+        document.getElementById('shop-form-card').onclick = (event) => {
+            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
+                toggleCard(document.getElementById('shop-form-card'));
+            }
+        };
 
         // مقداردهی اولیه Firebase
         initFirebase();
