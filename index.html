@@ -225,10 +225,6 @@
             <h2>🏕️ ثبت آگهی تورها</h2>
             <form id="travel-form">
                 <div class="form-group">
-                    <label>ارسال تصویر:</label>
-                    <input type="file" id="travel-image" accept="image/*">
-                </div>
-                <div class="form-group">
                     <label>نام برگزارکننده (نام تور):</label>
                     <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت گردی">
                 </div>
@@ -309,10 +305,6 @@
             <h2>🫂 ثبت آگهی ایونت</h2>
             <form id="event-form">
                 <div class="form-group">
-                    <label>ارسال تصویر:</label>
-                    <input type="file" id="event-image" accept="image/*">
-                </div>
-                <div class="form-group">
                     <label>عنوان:</label>
                     <select id="event-title">
                         <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
@@ -362,10 +354,6 @@
         <div class="form-content">
             <h2>🛍️ ثبت آگهی فروشگاه</h2>
             <form id="shop-form">
-                <div class="form-group">
-                    <label>ارسال تصویر:</label>
-                    <input type="file" id="shop-image" accept="image/*">
-                </div>
                 <div class="form-group">
                     <label>وضعیت محصول:</label>
                     <select id="shop-status">
@@ -630,19 +618,6 @@
         userInfo = tg.initDataUnsafe.user || {};
         const userAvatar = userInfo && userInfo.photo_url ? userInfo.photo_url : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
-        // تابع آپلود تصویر
-        async function uploadImage(file, timestamp) {
-            try {
-                const storageRef = ref(storage, `images/${timestamp}_${file.name}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const imageUrl = await getDownloadURL(snapshot.ref);
-                return imageUrl;
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                return '';
-            }
-        }
-
         // ثبت آگهی تورها
         document.getElementById('submit-travel').addEventListener('click', async () => {
             if (!isFirebaseReady) {
@@ -673,12 +648,6 @@
                 timestamp: timestamp,
                 imageUrl: ''
             };
-
-            const imageFile = document.getElementById('travel-image').files[0];
-            if (imageFile) {
-                const imageUrl = await uploadImage(imageFile, timestamp);
-                if (imageUrl) travelData.imageUrl = imageUrl;
-            }
 
             try {
                 await addDoc(collection(db, 'travels'), travelData);
@@ -715,12 +684,6 @@
                 imageUrl: ''
             };
 
-            const imageFile = document.getElementById('event-image').files[0];
-            if (imageFile) {
-                const imageUrl = await uploadImage(imageFile, timestamp);
-                if (imageUrl) eventData.imageUrl = imageUrl;
-            }
-
             try {
                 await addDoc(collection(db, 'events'), eventData);
                 alert('ایونت ثبت شد!');
@@ -754,12 +717,6 @@
                 timestamp: timestamp,
                 imageUrl: ''
             };
-
-            const imageFile = document.getElementById('shop-image').files[0];
-            if (imageFile) {
-                const imageUrl = await uploadImage(imageFile, timestamp);
-                if (imageUrl) shopData.imageUrl = imageUrl;
-            }
 
             try {
                 await addDoc(collection(db, 'shop'), shopData);
