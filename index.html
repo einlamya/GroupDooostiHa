@@ -65,21 +65,21 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
             cursor: pointer;
             text-align: right;
-            transition: height 0.5s ease, opacity 0.5s ease;
+            transition: max-height 0.3s ease-out, opacity 0.2s ease;
             overflow: hidden;
-            height: 60px;
+            max-height: 60px;
             opacity: 1;
         }
         .form-card .content {
             display: block;
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
             margin: 0 auto;
             padding: 10px;
         }
         .ad-card .content {
             display: block;
-            font-size: 16px;
+            font-size: 14px;
             text-align: right;
             margin: 0 auto;
             padding: 10px;
@@ -89,15 +89,15 @@
             margin-top: 10px;
             text-align: right;
         }
-        .form-card.expanded, .ad-card.expanded {
-            height: auto;
+        .form-card.expanded {
+            max-height: 600px; /* کافی برای فرم‌های بلند */
             padding: 20px;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
-        .form-card.expanded .content, .ad-card.expanded .content {
+        .form-card.expanded .content {
             display: none;
         }
-        .form-card.expanded .form-content, .ad-card.expanded .expanded-content {
+        .form-card.expanded .form-content {
             display: block;
         }
         #travel-ads, #event-ads, #shop-ads {
@@ -183,6 +183,18 @@
         .contact-link a:hover {
             text-decoration: underline;
         }
+        .reset-button {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
         @media (max-width: 768px) {
             .category {
                 grid-template-columns: 1fr;
@@ -219,7 +231,7 @@
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <div id="travel-form-card" class="form-card" style="display: none;">
         <div class="content">
-            <strong>📝 ثبت آگهی تور</strong>
+            <strong id="travel-toggle">📝 ثبت آگهی تور</strong>
         </div>
         <div class="form-content">
             <h2>🏕️ ثبت آگهی تورها</h2>
@@ -293,13 +305,18 @@
                     <label>توضیحات بیشتر:</label>
                     <textarea id="travel-description" placeholder="مثلاً: تور شامل صبحانه است..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>تصویر (اختیاری):</label>
+                    <input type="file" id="travel-image" accept="image/*">
+                </div>
                 <button type="button" id="submit-travel">✅ ثبت آگهی</button>
+                <button type="button" class="reset-button" id="reset-travel">🗑️ پاک کردن</button>
             </form>
         </div>
     </div>
     <div id="event-form-card" class="form-card" style="display: none;">
         <div class="content">
-            <strong>📝 ثبت آگهی ایونت</strong>
+            <strong id="event-toggle">📝 ثبت آگهی ایونت</strong>
         </div>
         <div class="form-content">
             <h2>🫂 ثبت آگهی ایونت</h2>
@@ -343,13 +360,18 @@
                     <label>توضیح بیشتر:</label>
                     <textarea id="event-description" placeholder="مثلاً: همراه با موسیقی..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>تصویر (اختیاری):</label>
+                    <input type="file" id="event-image" accept="image/*">
+                </div>
                 <button type="button" id="submit-event">✅ ثبت ایونت</button>
+                <button type="button" class="reset-button" id="reset-event">🗑️ پاک کردن</button>
             </form>
         </div>
     </div>
     <div id="shop-form-card" class="form-card" style="display: none;">
         <div class="content">
-            <strong>📝 ثبت آگهی فروشگاه</strong>
+            <strong id="shop-toggle">📝 ثبت آگهی فروشگاه</strong>
         </div>
         <div class="form-content">
             <h2>🛍️ ثبت آگهی فروشگاه</h2>
@@ -382,7 +404,12 @@
                     <label>توضیحات بیشتر:</label>
                     <textarea id="shop-description" placeholder="مثلاً: با گارانتی..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label>تصویر (اختیاری):</label>
+                    <input type="file" id="shop-image" accept="image/*">
+                </div>
                 <button type="button" id="submit-shop">✅ ثبت محصول</button>
+                <button type="button" class="reset-button" id="reset-shop">🗑️ پاک کردن</button>
             </form>
         </div>
     </div>
@@ -479,113 +506,51 @@
             if (currentExpandedCard) {
                 currentExpandedCard.classList.remove('expanded');
                 const content = currentExpandedCard.querySelector('.content');
-                const expandedContent = currentExpandedCard.querySelector('.expanded-content') || currentExpandedCard.querySelector('.form-content');
+                const expandedContent = currentExpandedCard.querySelector('.form-content');
                 content.style.display = 'block';
                 expandedContent.style.display = 'none';
                 currentExpandedCard = null;
             }
         }
 
-        // تابع برای toggle کردن کارت‌ها
-        function toggleCard(card) {
-            const isFormCard = card.classList.contains('form-card');
+        // تابع برای toggle کردن کارت‌ها فقط با کلیک روی عنوان
+        function toggleCard(cardId, toggleElementId) {
+            const card = document.getElementById(cardId);
             const isExpanded = card.classList.contains('expanded');
             const content = card.querySelector('.content');
-            const expandedContent = card.querySelector(isFormCard ? '.form-content' : '.expanded-content');
-
-            // بستن کارت باز قبلی
-            if (currentExpandedCard && currentExpandedCard !== card) {
-                closeCurrentExpandedCard();
-            }
+            const expandedContent = card.querySelector('.form-content');
+            const toggleElement = document.getElementById(toggleElementId);
 
             if (!isExpanded) {
+                closeCurrentExpandedCard();
                 card.classList.add('expanded');
-                content.style.display = 'none';
-                expandedContent.style.display = 'block';
-                currentExpandedCard = card;
-
-                if (!isFormCard) {
-                    const data = card.data;
-                    const type = card.type;
-                    const imageUrl = card.imageUrl;
-                    const userId = card.userId;
-                    const userName = card.userName;
-                    const userAvatar = card.userAvatar;
-
-                    expandedContent.innerHTML = '';
-                    if (imageUrl) {
-                        expandedContent.innerHTML += `<img src="${imageUrl}" alt="تصویر آگهی" class="expanded-img">`;
-                    }
-                    if (type === 'travel') {
-                        expandedContent.innerHTML += `
-                            <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
-                            <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
-                            <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
-                            <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
-                            <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
-                            <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
-                            <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
-                            <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
-                            <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                            <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                            <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
-                            <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
-                            <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
-                            <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
-                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                        `;
-                    } else if (type === 'event') {
-                        expandedContent.innerHTML += `
-                            <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
-                            <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
-                            <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
-                            <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
-                            <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                            <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                        `;
-                    } else if (type === 'shop') {
-                        expandedContent.innerHTML += `
-                            <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
-                            <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
-                            <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
-                            <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
-                            <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
-                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                        `;
-                    }
-
-                    // اضافه کردن لینک تماس با آگهی‌دهنده
-                    if (userId && userId !== 'unknown') {
-                        expandedContent.innerHTML += `
-                            <div class="contact-link">
-                                <img src="${userAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="آواتار">
-                                <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                                <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
-                            </div>
-                        `;
-                    } else if (data.phone) {
-                        expandedContent.innerHTML += `
-                            <div class="contact-link">
-                                <img src="${userAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="آواتار">
-                                <a href="tel:${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                                <a href="tel:${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
-                            </div>
-                        `;
-                    } else {
-                        expandedContent.innerHTML += `<p>اطلاعات تماس موجود نیست!</p>`;
-                    }
-                }
+                toggleElement.style.cursor = 'pointer';
             } else {
                 card.classList.remove('expanded');
-                content.style.display = 'block';
-                expandedContent.style.display = 'none';
-                currentExpandedCard = null;
+                toggleElement.style.cursor = 'pointer';
             }
         }
+
+        // تنظیم کلیک روی عنوان کارت‌ها
+        document.getElementById('travel-toggle').onclick = (event) => {
+            event.stopPropagation();
+            toggleCard('travel-form-card', 'travel-toggle');
+        };
+        document.getElementById('event-toggle').onclick = (event) => {
+            event.stopPropagation();
+            toggleCard('event-form-card', 'event-toggle');
+        };
+        document.getElementById('shop-toggle').onclick = (event) => {
+            event.stopPropagation();
+            toggleCard('shop-form-card', 'shop-toggle');
+        };
+
+        // جلوگیری از بسته شدن فرم با کلیک توی فرم
+        document.querySelectorAll('.form-content').forEach(formContent => {
+            formContent.addEventListener('click', (event) => {
+                event.stopPropagation();
+            });
+        });
 
         // مقداردهی Firebase
         async function initFirebase() {
@@ -609,6 +574,21 @@
             }
         }
 
+        // تابع برای آپلود تصویر به Firebase Storage
+        async function uploadImage(file) {
+            if (!file) return '';
+
+            const storageRef = ref(storage, `images/${Date.now()}_${file.name}`);
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(snapshot.ref);
+                return url;
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                return '';
+            }
+        }
+
         // تنظیمات Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -625,31 +605,39 @@
                 return;
             }
 
-            const timestamp = new Date().toISOString();
-            const travelData = {
-                organizer: document.getElementById('travel-organizer').value,
-                type: document.getElementById('travel-type').value,
-                leader: document.getElementById('travel-leader').value,
-                vehicle: document.getElementById('travel-vehicle').value,
-                origin: document.getElementById('travel-origin').value,
-                destination: document.getElementById('travel-destination').value,
-                departure: document.getElementById('travel-departure').value,
-                return: document.getElementById('travel-return').value,
-                capacity: document.getElementById('travel-capacity').value,
-                cost: document.getElementById('travel-cost').value,
-                extraCost: document.getElementById('travel-extra-cost').value,
-                card: document.getElementById('travel-card').value,
-                owner: document.getElementById('travel-owner').value,
-                phone: document.getElementById('travel-phone').value,
-                description: document.getElementById('travel-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
-                userAvatar: userAvatar,
-                timestamp: timestamp,
-                imageUrl: ''
-            };
+            const imageFile = document.getElementById('travel-image').files[0];
+            let imageUrl = '';
 
             try {
+                // آپلود تصویر اگه وجود داشته باشه
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile);
+                }
+
+                const timestamp = new Date().toISOString();
+                const travelData = {
+                    organizer: document.getElementById('travel-organizer').value,
+                    type: document.getElementById('travel-type').value,
+                    leader: document.getElementById('travel-leader').value,
+                    vehicle: document.getElementById('travel-vehicle').value,
+                    origin: document.getElementById('travel-origin').value,
+                    destination: document.getElementById('travel-destination').value,
+                    departure: document.getElementById('travel-departure').value,
+                    return: document.getElementById('travel-return').value,
+                    capacity: document.getElementById('travel-capacity').value,
+                    cost: document.getElementById('travel-cost').value,
+                    extraCost: document.getElementById('travel-extra-cost').value,
+                    card: document.getElementById('travel-card').value,
+                    owner: document.getElementById('travel-owner').value,
+                    phone: document.getElementById('travel-phone').value,
+                    description: document.getElementById('travel-description').value,
+                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
+                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userAvatar: userAvatar,
+                    timestamp: timestamp,
+                    imageUrl: imageUrl
+                };
+
                 await addDoc(collection(db, 'travels'), travelData);
                 alert('آگهی تور ثبت شد!');
                 closeCurrentExpandedCard();
@@ -668,23 +656,31 @@
                 return;
             }
 
-            const timestamp = new Date().toISOString();
-            const eventData = {
-                title: document.getElementById('event-title').value,
-                startDate: document.getElementById('event-date').value,
-                endDate: document.getElementById('event-end-date').value,
-                location: document.getElementById('event-location').value,
-                capacity: document.getElementById('event-capacity').value,
-                cost: document.getElementById('event-cost').value,
-                description: document.getElementById('event-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
-                userAvatar: userAvatar,
-                timestamp: timestamp,
-                imageUrl: ''
-            };
+            const imageFile = document.getElementById('event-image').files[0];
+            let imageUrl = '';
 
             try {
+                // آپلود تصویر اگه وجود داشته باشه
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile);
+                }
+
+                const timestamp = new Date().toISOString();
+                const eventData = {
+                    title: document.getElementById('event-title').value,
+                    startDate: document.getElementById('event-date').value,
+                    endDate: document.getElementById('event-end-date').value,
+                    location: document.getElementById('event-location').value,
+                    capacity: document.getElementById('event-capacity').value,
+                    cost: document.getElementById('event-cost').value,
+                    description: document.getElementById('event-description').value,
+                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
+                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userAvatar: userAvatar,
+                    timestamp: timestamp,
+                    imageUrl: imageUrl
+                };
+
                 await addDoc(collection(db, 'events'), eventData);
                 alert('ایونت ثبت شد!');
                 closeCurrentExpandedCard();
@@ -703,22 +699,30 @@
                 return;
             }
 
-            const timestamp = new Date().toISOString();
-            const shopData = {
-                status: document.getElementById('shop-status').value,
-                brand: document.getElementById('shop-brand').value,
-                model: document.getElementById('shop-model').value,
-                year: document.getElementById('shop-year').value,
-                price: document.getElementById('shop-price').value,
-                description: document.getElementById('shop-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
-                userAvatar: userAvatar,
-                timestamp: timestamp,
-                imageUrl: ''
-            };
+            const imageFile = document.getElementById('shop-image').files[0];
+            let imageUrl = '';
 
             try {
+                // آپلود تصویر اگه وجود داشته باشه
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile);
+                }
+
+                const timestamp = new Date().toISOString();
+                const shopData = {
+                    status: document.getElementById('shop-status').value,
+                    brand: document.getElementById('shop-brand').value,
+                    model: document.getElementById('shop-model').value,
+                    year: document.getElementById('shop-year').value,
+                    price: document.getElementById('shop-price').value,
+                    description: document.getElementById('shop-description').value,
+                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
+                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userAvatar: userAvatar,
+                    timestamp: timestamp,
+                    imageUrl: imageUrl
+                };
+
                 await addDoc(collection(db, 'shop'), shopData);
                 alert('محصول ثبت شد!');
                 closeCurrentExpandedCard();
@@ -728,6 +732,17 @@
                 alert('خطا در ثبت محصول: ' + error.message);
                 console.error('Error saving shop data:', error);
             }
+        });
+
+        // دکمه‌های پاک کردن
+        document.getElementById('reset-travel').addEventListener('click', () => {
+            document.getElementById('travel-form').reset();
+        });
+        document.getElementById('reset-event').addEventListener('click', () => {
+            document.getElementById('event-form').reset();
+        });
+        document.getElementById('reset-shop').addEventListener('click', () => {
+            document.getElementById('shop-form').reset();
         });
 
         // بارگذاری آگهی‌های تورها
@@ -844,34 +859,6 @@
                 shopAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + error.message + '</p>';
             }
         }
-
-        // تنظیم کلیک روی کارت فرم‌ها
-        document.getElementById('travel-form-card').onclick = (event) => {
-            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
-                toggleCard(document.getElementById('travel-form-card'));
-            }
-        };
-        document.getElementById('event-form-card').onclick = (event) => {
-            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
-                toggleCard(document.getElementById('event-form-card'));
-            }
-        };
-        document.getElementById('shop-form-card').onclick = (event) => {
-            if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
-                toggleCard(document.getElementById('shop-form-card'));
-            }
-        };
-
-        // جلوگیری از بسته شدن فرم هنگام کلیک روی دکمه ثبت
-        document.getElementById('submit-travel').onclick = (event) => {
-            event.stopPropagation();
-        };
-        document.getElementById('submit-event').onclick = (event) => {
-            event.stopPropagation();
-        };
-        document.getElementById('submit-shop').onclick = (event) => {
-            event.stopPropagation();
-        };
 
         // مقداردهی اولیه Firebase
         initFirebase();
