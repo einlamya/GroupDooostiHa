@@ -412,7 +412,12 @@
         let currentExpandedCard = null;
 
         // تنظیم تقویم شمسی
-        document.addEventListener('DOMContentLoaded', () => {
+        function initializeDatePicker() {
+            if (typeof persianDate === 'undefined' || typeof persianDatepicker === 'undefined') {
+                console.error("Persian Date or Datepicker library not loaded.");
+                return;
+            }
+
             const today = new persianDate().format('YYYY/MM/DD');
             document.querySelectorAll('.persian-date').forEach(input => {
                 new persianDatepicker({
@@ -427,6 +432,11 @@
                     }
                 });
             });
+        }
+
+        // اطمینان از لود شدن اسکریپت‌ها قبل از اجرای تابع
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initializeDatePicker, 500); // تاخیر برای اطمینان از لود شدن اسکریپت‌ها
         });
 
         // تعریف تابع toggleSection
@@ -638,8 +648,8 @@
                 owner: document.getElementById('travel-owner').value,
                 phone: document.getElementById('travel-phone').value,
                 description: document.getElementById('travel-description').value,
-                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
-                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp,
                 imageUrl: ''
@@ -679,8 +689,8 @@
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
                 description: document.getElementById('event-description').value,
-                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
-                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp
             };
@@ -712,8 +722,8 @@
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
-                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
-                userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp,
                 imageUrl: ''
