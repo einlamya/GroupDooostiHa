@@ -55,7 +55,7 @@
             font-weight: 700;
         }
         #travel-form, #event-form, #shop-form {
-            display: none;
+            display: block;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
@@ -64,13 +64,16 @@
             max-width: 33%;
             margin-left: auto;
             margin-right: auto;
-            transition: all 0.3s ease;
+            transition: height 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
             overflow: hidden;
             height: 0;
+            opacity: 0;
+            transform: scale(0.95);
         }
         #travel-form.expanded, #event-form.expanded, #shop-form.expanded {
             height: auto;
-            max-width: 100%;
+            opacity: 1;
+            transform: scale(1);
         }
         #travel-ads, #event-ads, #shop-ads {
             display: none;
@@ -80,13 +83,13 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-top: 20px;
             text-align: right;
-            max-width: 100%;
             margin-left: auto;
             margin-right: auto;
         }
         #travel-ads-list, #event-ads-list, #shop-ads-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
         }
         .form-group {
@@ -106,6 +109,9 @@
             font-size: 14px;
             box-sizing: border-box;
         }
+        .form-group input::placeholder {
+            color: #999;
+        }
         #submit-travel, #submit-event, #submit-shop {
             background-color: #008CBA;
             color: white;
@@ -119,20 +125,18 @@
             background-color: #007399;
         }
         .ad-card {
-            display: inline-block;
+            flex: 0 0 calc(50% - 5px);
             background-color: #fff;
             padding: 15px;
-            margin: 10px;
+            margin: 5px;
             border-radius: 10px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            width: 200px;
             cursor: pointer;
             text-align: right;
-            vertical-align: top;
             transition: all 0.3s ease;
         }
         .ad-card.expanded {
-            width: 400px;
+            flex: 0 0 400px;
             height: auto;
             padding: 20px;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -142,12 +146,9 @@
             height: 50px;
             object-fit: cover;
             border-radius: 5px;
-            position: absolute;
-            left: 15px;
-            top: 15px;
         }
         .ad-card .content {
-            margin-left: 60px;
+            margin-left: 0;
         }
         .ad-card .expanded-content {
             display: none;
@@ -193,14 +194,11 @@
             #travel-ads, #event-ads, #shop-ads {
                 max-width: 100%;
             }
-            #travel-ads-list, #event-ads-list, #shop-ads-list {
-                grid-template-columns: 1fr;
-            }
             .ad-card {
-                width: 100%;
+                flex: 0 0 calc(100% - 10px);
             }
             .ad-card.expanded {
-                width: 90%;
+                flex: 0 0 90%;
             }
             body {
                 font-family: 'Vazir', Arial, sans-serif;
@@ -235,7 +233,7 @@
         </div>
         <div class="form-group">
             <label>نام لیدر:</label>
-            <input type="text" id="travel-leader" value="علی اکبری" placeholder="مثلاً: علی اکبری">
+            <input type="text" id="travel-leader" placeholder="مثلاً: علی اکبری">
         </div>
         <div class="form-group">
             <label>وسیله سفر:</label>
@@ -281,7 +279,7 @@
         </div>
         <div class="form-group">
             <label>به نام:</label>
-            <input type="text" id="travel-owner" value="علی اکبری" placeholder="مثلاً: علی اکبری">
+            <input type="text" id="travel-owner" placeholder="مثلاً: علی اکبری">
         </div>
         <div class="form-group">
             <label>تلفن هماهنگی:</label>
@@ -414,27 +412,33 @@
 
         // تعریف تابع showSection
         window.showSection = function(section) {
-            document.getElementById('travel-form').style.display = 'none';
-            document.getElementById('event-form').style.display = 'none';
-            document.getElementById('shop-form').style.display = 'none';
-            document.getElementById('travel-ads').style.display = 'none';
-            document.getElementById('event-ads').style.display = 'none';
-            document.getElementById('shop-ads').style.display = 'none';
+            const travelForm = document.getElementById('travel-form');
+            const eventForm = document.getElementById('event-form');
+            const shopForm = document.getElementById('shop-form');
+            const travelAds = document.getElementById('travel-ads');
+            const eventAds = document.getElementById('event-ads');
+            const shopAds = document.getElementById('shop-ads');
 
+            // بستن همه فرم‌ها و بخش‌ها
+            travelForm.classList.remove('expanded');
+            eventForm.classList.remove('expanded');
+            shopForm.classList.remove('expanded');
+            travelAds.style.display = 'none';
+            eventAds.style.display = 'none';
+            shopAds.style.display = 'none';
+
+            // باز کردن بخش مورد نظر
             if (section === 'travel') {
-                document.getElementById('travel-form').style.display = 'block';
-                setTimeout(() => document.getElementById('travel-form').classList.add('expanded'), 10);
-                document.getElementById('travel-ads').style.display = 'block';
+                setTimeout(() => travelForm.classList.add('expanded'), 10);
+                travelAds.style.display = 'block';
                 loadTravelAds();
             } else if (section === 'event') {
-                document.getElementById('event-form').style.display = 'block';
-                setTimeout(() => document.getElementById('event-form').classList.add('expanded'), 10);
-                document.getElementById('event-ads').style.display = 'block';
+                setTimeout(() => eventForm.classList.add('expanded'), 10);
+                eventAds.style.display = 'block';
                 loadEventAds();
             } else if (section === 'shop') {
-                document.getElementById('shop-form').style.display = 'block';
-                setTimeout(() => document.getElementById('shop-form').classList.add('expanded'), 10);
-                document.getElementById('shop-ads').style.display = 'block';
+                setTimeout(() => shopForm.classList.add('expanded'), 10);
+                shopAds.style.display = 'block';
                 loadShopAds();
             }
         };
@@ -498,16 +502,16 @@
                 if (userId && userId !== 'unknown') {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
-                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
+                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
                 } else if (data.phone) {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
-                            <a href="https://t.me/+${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
+                            <a href="https://t.me/+${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <a href="https://t.me/+${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
@@ -573,7 +577,7 @@
                 owner: document.getElementById('travel-owner').value,
                 phone: document.getElementById('travel-phone').value,
                 description: document.getElementById('travel-description').value,
-                userId: userInfo ? userInfo.id : 'unknown',
+                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
@@ -610,7 +614,7 @@
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
                 description: document.getElementById('event-description').value,
-                userId: userInfo ? userInfo.id : 'unknown',
+                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
@@ -640,7 +644,7 @@
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
-                userId: userInfo ? userInfo.id : 'unknown',
+                userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
                 timestamp: new Date().toISOString()
             };
