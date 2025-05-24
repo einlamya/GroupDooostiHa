@@ -55,25 +55,24 @@
             font-weight: 700;
         }
         #travel-form, #event-form, #shop-form {
-            display: block;
+            display: none;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            max-width: 33%;
+            width: 33%;
             margin-left: auto;
             margin-right: auto;
-            transition: height 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+            transition: height 0.5s ease, opacity 0.5s ease;
             overflow: hidden;
             height: 0;
             opacity: 0;
-            transform: scale(0.95);
         }
-        #travel-form.expanded, #event-form.expanded, #shop-form.expanded {
+        #travel-form.active, #event-form.active, #shop-form.active {
+            display: block;
             height: auto;
             opacity: 1;
-            transform: scale(1);
         }
         #travel-ads, #event-ads, #shop-ads {
             display: none;
@@ -189,7 +188,7 @@
                 max-width: 200px;
             }
             #travel-form, #event-form, #shop-form {
-                max-width: 100%;
+                width: 100%;
             }
             #travel-ads, #event-ads, #shop-ads {
                 max-width: 100%;
@@ -209,9 +208,9 @@
 <body>
     <h1>🧳 گروه دوستی‌ها</h1>
     <div class="category">
-        <button onclick="showSection('event')">🫂 ایونت‌ها</button>
-        <button onclick="showSection('travel')">🏕️ تورها</button>
-        <button onclick="showSection('shop')">🛍️ فروشگاه</button>
+        <button onclick="toggleSection('event')">🫂 ایونت‌ها</button>
+        <button onclick="toggleSection('travel')">🏕️ تورها</button>
+        <button onclick="toggleSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <form id="travel-form">
@@ -385,7 +384,7 @@
     <script type="module">
         // وارد کردن توابع Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
         let db;
         let isFirebaseReady = false;
@@ -410,8 +409,8 @@
             });
         });
 
-        // تعریف تابع showSection
-        window.showSection = function(section) {
+        // تعریف تابع toggleSection
+        window.toggleSection = function(section) {
             const travelForm = document.getElementById('travel-form');
             const eventForm = document.getElementById('event-form');
             const shopForm = document.getElementById('shop-form');
@@ -420,26 +419,38 @@
             const shopAds = document.getElementById('shop-ads');
 
             // بستن همه فرم‌ها و بخش‌ها
-            travelForm.classList.remove('expanded');
-            eventForm.classList.remove('expanded');
-            shopForm.classList.remove('expanded');
+            travelForm.classList.remove('active');
+            eventForm.classList.remove('active');
+            shopForm.classList.remove('active');
             travelAds.style.display = 'none';
             eventAds.style.display = 'none';
             shopAds.style.display = 'none';
 
-            // باز کردن بخش مورد نظر
+            // تoggle کردن بخش مورد نظر
             if (section === 'travel') {
-                setTimeout(() => travelForm.classList.add('expanded'), 10);
-                travelAds.style.display = 'block';
-                loadTravelAds();
+                if (travelForm.classList.contains('active')) {
+                    travelForm.classList.remove('active');
+                } else {
+                    travelForm.classList.add('active');
+                    travelAds.style.display = 'block';
+                    loadTravelAds();
+                }
             } else if (section === 'event') {
-                setTimeout(() => eventForm.classList.add('expanded'), 10);
-                eventAds.style.display = 'block';
-                loadEventAds();
+                if (eventForm.classList.contains('active')) {
+                    eventForm.classList.remove('active');
+                } else {
+                    eventForm.classList.add('active');
+                    eventAds.style.display = 'block';
+                    loadEventAds();
+                }
             } else if (section === 'shop') {
-                setTimeout(() => shopForm.classList.add('expanded'), 10);
-                shopAds.style.display = 'block';
-                loadShopAds();
+                if (shopForm.classList.contains('active')) {
+                    shopForm.classList.remove('active');
+                } else {
+                    shopForm.classList.add('active');
+                    shopAds.style.display = 'block';
+                    loadShopAds();
+                }
             }
         };
 
@@ -511,8 +522,8 @@
                     expandedContent.innerHTML += `
                         <div class="contact-link">
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="https://t.me/+${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                            <a href="https://t.me/+${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
+                            <a href="tel:${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <a href="tel:${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
                 } else {
@@ -528,6 +539,8 @@
         // مقداردهی Firebase
         async function initFirebase() {
             const firebaseConfig = {
+
+
 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
@@ -591,6 +604,7 @@
             try {
                 await addDoc(collection(db, 'travels'), travelData);
                 alert('آگهی تور ثبت شد!');
+                document.getElementById('travel-form').classList.remove('active');
                 document.getElementById('travel-form').reset();
                 loadTravelAds();
             } catch (error) {
@@ -622,6 +636,7 @@
             try {
                 await addDoc(collection(db, 'events'), eventData);
                 alert('ایونت ثبت شد!');
+                document.getElementById('event-form').classList.remove('active');
                 document.getElementById('event-form').reset();
                 loadEventAds();
             } catch (error) {
@@ -658,6 +673,7 @@
             try {
                 await addDoc(collection(db, 'shop'), shopData);
                 alert('محصول ثبت شد!');
+                document.getElementById('shop-form').classList.remove('active');
                 document.getElementById('shop-form').reset();
                 loadShopAds();
             } catch (error) {
@@ -671,7 +687,8 @@
             const travelAdsList = document.getElementById('travel-ads-list');
             travelAdsList.innerHTML = '';
             try {
-                const travelsSnapshot = await getDocs(collection(db, 'travels'));
+                const q = query(collection(db, 'travels'), orderBy('timestamp', 'desc'));
+                const travelsSnapshot = await getDocs(q);
                 if (travelsSnapshot.empty) {
                     travelAdsList.innerHTML = '<p>آگهی توری یافت نشد.</p>';
                 } else {
@@ -703,7 +720,8 @@
             const eventAdsList = document.getElementById('event-ads-list');
             eventAdsList.innerHTML = '';
             try {
-                const eventsSnapshot = await getDocs(collection(db, 'events'));
+                const q = query(collection(db, 'events'), orderBy('timestamp', 'desc'));
+                const eventsSnapshot = await getDocs(q);
                 if (eventsSnapshot.empty) {
                     eventAdsList.innerHTML = '<p>آگهی ایونتی یافت نشد.</p>';
                 } else {
@@ -733,7 +751,8 @@
             const shopAdsList = document.getElementById('shop-ads-list');
             shopAdsList.innerHTML = '';
             try {
-                const shopSnapshot = await getDocs(collection(db, 'shop'));
+                const q = query(collection(db, 'shop'), orderBy('timestamp', 'desc'));
+                const shopSnapshot = await getDocs(q);
                 if (shopSnapshot.empty) {
                     shopAdsList.innerHTML = '<p>آگهی فروشگاهی یافت نشد.</p>';
                 } else {
