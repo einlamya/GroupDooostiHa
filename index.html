@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@persian-tools/persian-fonts@1.0.0/dist/IRANSans.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
     <style>
@@ -413,15 +414,18 @@
 
         // تنظیم تقویم شمسی
         function initializeDatePicker() {
+            if (typeof jQuery === 'undefined') {
+                console.error("jQuery is not loaded.");
+                return;
+            }
             if (typeof persianDate === 'undefined' || typeof persianDatepicker === 'undefined') {
                 console.error("Persian Date or Datepicker library not loaded.");
                 return;
             }
 
             const today = new persianDate().format('YYYY/MM/DD');
-            document.querySelectorAll('.persian-date').forEach(input => {
-                new persianDatepicker({
-                    element: input,
+            jQuery('.persian-date').each(function() {
+                jQuery(this).persianDatepicker({
                     initialValue: today,
                     format: 'YYYY/MM/DD',
                     autoClose: true,
@@ -648,7 +652,7 @@
                 owner: document.getElementById('travel-owner').value,
                 phone: document.getElementById('travel-phone').value,
                 description: document.getElementById('travel-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
                 userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp,
@@ -689,7 +693,7 @@
                 capacity: document.getElementById('event-capacity').value,
                 cost: document.getElementById('event-cost').value,
                 description: document.getElementById('event-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
                 userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp
@@ -722,7 +726,7 @@
                 year: document.getElementById('shop-year').value,
                 price: document.getElementById('shop-price').value,
                 description: document.getElementById('shop-description').value,
-                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || userInfo.id.toString()) : 'unknown',
+                userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
                 userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
                 userAvatar: userAvatar,
                 timestamp: timestamp,
