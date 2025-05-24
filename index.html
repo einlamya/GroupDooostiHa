@@ -6,6 +6,7 @@
     <title>گروه دوستی‌ها</title>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@persian-tools/persian-fonts@1.0.0/dist/IRANSans.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
@@ -54,25 +55,37 @@
             margin-top: 10px;
             font-weight: 700;
         }
-        #travel-form, #event-form, #shop-form {
-            display: none;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        .form-card, .ad-card {
             width: 33%;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 10px auto;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            text-align: right;
             transition: height 0.5s ease, opacity 0.5s ease;
             overflow: hidden;
-            height: 0;
-            opacity: 0;
-        }
-        #travel-form.active, #event-form.active, #shop-form.active {
-            display: block;
-            height: auto;
+            height: 60px;
             opacity: 1;
+        }
+        .form-card .content, .ad-card .content {
+            display: block;
+        }
+        .form-card .form-content, .ad-card .expanded-content {
+            display: none;
+            margin-top: 10px;
+        }
+        .form-card.expanded, .ad-card.expanded {
+            height: auto;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        .form-card.expanded .content, .ad-card.expanded .content {
+            display: none;
+        }
+        .form-card.expanded .form-content, .ad-card.expanded .expanded-content {
+            display: block;
         }
         #travel-ads, #event-ads, #shop-ads {
             display: none;
@@ -123,41 +136,11 @@
         #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
             background-color: #007399;
         }
-        .ad-card {
-            flex: 0 0 calc(50% - 5px);
-            background-color: #fff;
-            padding: 15px;
-            margin: 5px;
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            cursor: pointer;
-            text-align: right;
-            transition: all 0.3s ease;
-        }
-        .ad-card.expanded {
-            flex: 0 0 400px;
-            height: auto;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        }
         .ad-card img {
             width: 50px;
             height: 50px;
             object-fit: cover;
             border-radius: 5px;
-        }
-        .ad-card .content {
-            margin-left: 0;
-        }
-        .ad-card .expanded-content {
-            display: none;
-        }
-        .ad-card.expanded .content {
-            display: none;
-        }
-        .ad-card.expanded .expanded-content {
-            display: block;
-            margin-top: 10px;
         }
         .contact-link {
             display: flex;
@@ -187,7 +170,7 @@
                 width: 50%;
                 max-width: 200px;
             }
-            #travel-form, #event-form, #shop-form {
+            .form-card, .ad-card {
                 width: 100%;
             }
             #travel-ads, #event-ads, #shop-ads {
@@ -213,162 +196,183 @@
         <button onclick="toggleSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
-    <form id="travel-form">
-        <h2>🏕️ ثبت آگهی تورها</h2>
-        <div class="form-group">
-            <label>ارسال تصویر:</label>
-            <input type="file" id="travel-image" accept="image/*">
+    <div id="travel-form-card" class="form-card" style="display: none;">
+        <div class="content">
+            <strong>📝 ثبت آگهی تور</strong>
         </div>
-        <div class="form-group">
-            <label>نام برگزارکننده (نام تور):</label>
-            <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت گردی">
+        <div class="form-content">
+            <h2>🏕️ ثبت آگهی تورها</h2>
+            <form id="travel-form">
+                <div class="form-group">
+                    <label>ارسال تصویر:</label>
+                    <input type="file" id="travel-image" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>نام برگزارکننده (نام تور):</label>
+                    <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت گردی">
+                </div>
+                <div class="form-group">
+                    <label>نوع سفر:</label>
+                    <select id="travel-type">
+                        <option value="داخلی">داخلی</option>
+                        <option value="خارجی">خارجی</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>نام لیدر:</label>
+                    <input type="text" id="travel-leader" placeholder="مثلاً: علی اکبری">
+                </div>
+                <div class="form-group">
+                    <label>وسیله سفر:</label>
+                    <select id="travel-vehicle">
+                        <option value="خودرو شخصی">خودرو شخصی</option>
+                        <option value="اتوبوس">اتوبوس</option>
+                        <option value="هواپیما">هواپیما</option>
+                        <option value="هیچ‌هایک">هیچ‌هایک</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>مبدا:</label>
+                    <input type="text" id="travel-origin" placeholder="مثلاً: تهران">
+                </div>
+                <div class="form-group">
+                    <label>مقصد:</label>
+                    <input type="text" id="travel-destination" placeholder="مثلاً: شیراز">
+                </div>
+                <div class="form-group">
+                    <label>تاریخ رفت:</label>
+                    <input type="text" id="travel-departure" class="persian-date">
+                </div>
+                <div class="form-group">
+                    <label>تاریخ برگشت:</label>
+                    <input type="text" id="travel-return" class="persian-date">
+                </div>
+                <div class="form-group">
+                    <label>ظرفیت باقی‌مانده:</label>
+                    <input type="text" id="travel-capacity" placeholder="مثلاً: 4 نفر">
+                </div>
+                <div class="form-group">
+                    <label>هزینه:</label>
+                    <input type="text" id="travel-cost" placeholder="مثلاً: 1,000,000 تومان">
+                </div>
+                <div class="form-group">
+                    <label>هزینه اضافی:</label>
+                    <input type="text" id="travel-extra-cost" placeholder="دنگ خودرو/ ورودی ...">
+                </div>
+                <div class="form-group">
+                    <label>شماره کارت واریزی:</label>
+                    <input type="text" id="travel-card" placeholder="6037-6037-6037-6037">
+                </div>
+                <div class="form-group">
+                    <label>به نام:</label>
+                    <input type="text" id="travel-owner" placeholder="مثلاً: علی اکبری">
+                </div>
+                <div class="form-group">
+                    <label>تلفن هماهنگی:</label>
+                    <input type="text" id="travel-phone" placeholder="مثلاً: 09123456789">
+                </div>
+                <div class="form-group">
+                    <label>توضیحات بیشتر:</label>
+                    <textarea id="travel-description" placeholder="مثلاً: تور شامل صبحانه است..."></textarea>
+                </div>
+                <button type="button" id="submit-travel">✅ ثبت آگهی</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label>نوع سفر:</label>
-            <select id="travel-type">
-                <option value="داخلی">داخلی</option>
-                <option value="خارجی">خارجی</option>
-            </select>
+    </div>
+    <div id="event-form-card" class="form-card" style="display: none;">
+        <div class="content">
+            <strong>📝 ثبت آگهی ایونت</strong>
         </div>
-        <div class="form-group">
-            <label>نام لیدر:</label>
-            <input type="text" id="travel-leader" placeholder="مثلاً: علی اکبری">
+        <div class="form-content">
+            <h2>🫂 ثبت آگهی ایونت</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label>عنوان:</label>
+                    <select id="event-title">
+                        <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
+                        <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
+                        <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
+                        <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
+                        <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
+                        <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
+                        <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
+                        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
+                        <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
+                        <option value="سایر...">سایر...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تاریخ شروع:</label>
+                    <input type="text" id="event-date" class="persian-date">
+                </div>
+                <div class="form-group">
+                    <label>تاریخ پایان:</label>
+                    <input type="text" id="event-end-date" class="persian-date">
+                </div>
+                <div class="form-group">
+                    <label>مکان:</label>
+                    <input type="text" id="event-location" placeholder="مثلاً: تهران، پارک ملت">
+                </div>
+                <div class="form-group">
+                    <label>ظرفیت:</label>
+                    <input type="text" id="event-capacity" placeholder="مثلاً: 50 نفر">
+                </div>
+                <div class="form-group">
+                    <label>هزینه:</label>
+                    <input type="text" id="event-cost" placeholder="مثلاً: 500,000 تومان">
+                </div>
+                <div class="form-group">
+                    <label>توضیح بیشتر:</label>
+                    <textarea id="event-description" placeholder="مثلاً: همراه با موسیقی..."></textarea>
+                </div>
+                <button type="button" id="submit-event">✅ ثبت ایونت</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label>وسیله سفر:</label>
-            <select id="travel-vehicle">
-                <option value="خودرو شخصی">خودرو شخصی</option>
-                <option value="اتوبوس">اتوبوس</option>
-                <option value="هواپیما">هواپیما</option>
-                <option value="هیچ‌هایک">هیچ‌هایک</option>
-                <option value="سایر">سایر</option>
-            </select>
+    </div>
+    <div id="shop-form-card" class="form-card" style="display: none;">
+        <div class="content">
+            <strong>📝 ثبت آگهی فروشگاه</strong>
         </div>
-        <div class="form-group">
-            <label>مبدا:</label>
-            <input type="text" id="travel-origin" placeholder="مثلاً: تهران">
+        <div class="form-content">
+            <h2>🛍️ ثبت آگهی فروشگاه</h2>
+            <form id="shop-form">
+                <div class="form-group">
+                    <label>ارسال تصویر:</label>
+                    <input type="file" id="shop-image" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>وضعیت محصول:</label>
+                    <select id="shop-status">
+                        <option value="نو">نو</option>
+                        <option value="کارکرده">کارکرده</option>
+                        <option value="در حد نو">در حد نو</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>برند کالا:</label>
+                    <input type="text" id="shop-brand" placeholder="مثلاً: سامسونگ">
+                </div>
+                <div class="form-group">
+                    <label>مدل:</label>
+                    <input type="text" id="shop-model" placeholder="مثلاً: Galaxy S21">
+                </div>
+                <div class="form-group">
+                    <label>سال تولید:</label>
+                    <input type="text" id="shop-year" placeholder="مثلاً: 1399">
+                </div>
+                <div class="form-group">
+                    <label>قیمت:</label>
+                    <input type="text" id="shop-price" placeholder="مثلاً: 2,000,000 تومان">
+                </div>
+                <div class="form-group">
+                    <label>توضیحات بیشتر:</label>
+                    <textarea id="shop-description" placeholder="مثلاً: با گارانتی..."></textarea>
+                </div>
+                <button type="button" id="submit-shop">✅ ثبت محصول</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label>مقصد:</label>
-            <input type="text" id="travel-destination" placeholder="مثلاً: شیراز">
-        </div>
-        <div class="form-group">
-            <label>تاریخ رفت:</label>
-            <input type="text" id="travel-departure" class="persian-date">
-        </div>
-        <div class="form-group">
-            <label>تاریخ برگشت:</label>
-            <input type="text" id="travel-return" class="persian-date">
-        </div>
-        <div class="form-group">
-            <label>ظرفیت باقی‌مانده:</label>
-            <input type="text" id="travel-capacity" placeholder="مثلاً: 4 نفر">
-        </div>
-        <div class="form-group">
-            <label>هزینه:</label>
-            <input type="text" id="travel-cost" placeholder="مثلاً: 1,000,000 تومان">
-        </div>
-        <div class="form-group">
-            <label>هزینه اضافی:</label>
-            <input type="text" id="travel-extra-cost" placeholder="دنگ خودرو/ ورودی ...">
-        </div>
-        <div class="form-group">
-            <label>شماره کارت واریزی:</label>
-            <input type="text" id="travel-card" placeholder="6037-6037-6037-6037">
-        </div>
-        <div class="form-group">
-            <label>به نام:</label>
-            <input type="text" id="travel-owner" placeholder="مثلاً: علی اکبری">
-        </div>
-        <div class="form-group">
-            <label>تلفن هماهنگی:</label>
-            <input type="text" id="travel-phone" placeholder="مثلاً: 09123456789">
-        </div>
-        <div class="form-group">
-            <label>توضیحات بیشتر:</label>
-            <textarea id="travel-description" placeholder="مثلاً: تور شامل صبحانه است..."></textarea>
-        </div>
-        <button type="button" id="submit-travel">✅ ثبت آگهی</button>
-    </form>
-    <form id="event-form">
-        <h2>🫂 ثبت آگهی ایونت</h2>
-        <div class="form-group">
-            <label>عنوان:</label>
-            <select id="event-title">
-                <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
-                <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
-                <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
-                <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
-                <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
-                <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
-                <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
-                <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
-                <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
-                <option value="سایر...">سایر...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>تاریخ شروع:</label>
-            <input type="text" id="event-date" class="persian-date">
-        </div>
-        <div class="form-group">
-            <label>تاریخ پایان:</label>
-            <input type="text" id="event-end-date" class="persian-date">
-        </div>
-        <div class="form-group">
-            <label>مکان:</label>
-            <input type="text" id="event-location" placeholder="مثلاً: تهران، پارک ملت">
-        </div>
-        <div class="form-group">
-            <label>ظرفیت:</label>
-            <input type="text" id="event-capacity" placeholder="مثلاً: 50 نفر">
-        </div>
-        <div class="form-group">
-            <label>هزینه:</label>
-            <input type="text" id="event-cost" placeholder="مثلاً: 500,000 تومان">
-        </div>
-        <div class="form-group">
-            <label>توضیح بیشتر:</label>
-            <textarea id="event-description" placeholder="مثلاً: همراه با موسیقی..."></textarea>
-        </div>
-        <button type="button" id="submit-event">✅ ثبت ایونت</button>
-    </form>
-    <form id="shop-form">
-        <h2>🛍️ ثبت آگهی فروشگاه</h2>
-        <div class="form-group">
-            <label>ارسال تصویر:</label>
-            <input type="file" id="shop-image" accept="image/*">
-        </div>
-        <div class="form-group">
-            <label>وضعیت محصول:</label>
-            <select id="shop-status">
-                <option value="نو">نو</option>
-                <option value="کارکرده">کارکرده</option>
-                <option value="در حد نو">در حد نو</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>برند کالا:</label>
-            <input type="text" id="shop-brand" placeholder="مثلاً: سامسونگ">
-        </div>
-        <div class="form-group">
-            <label>مدل:</label>
-            <input type="text" id="shop-model" placeholder="مثلاً: Galaxy S21">
-        </div>
-        <div class="form-group">
-            <label>سال تولید:</label>
-            <input type="text" id="shop-year" placeholder="مثلاً: 1399">
-        </div>
-        <div class="form-group">
-            <label>قیمت:</label>
-            <input type="text" id="shop-price" placeholder="مثلاً: 2,000,000 تومان">
-        </div>
-        <div class="form-group">
-            <label>توضیحات بیشتر:</label>
-            <textarea id="shop-description" placeholder="مثلاً: با گارانتی..."></textarea>
-        </div>
-        <button type="button" id="submit-shop">✅ ثبت محصول</button>
-    </form>
+    </div>
     <div id="travel-ads">
         <h2>🏕️ آگهی‌های تورها</h2>
         <div id="travel-ads-list"></div>
@@ -385,11 +389,13 @@
         // وارد کردن توابع Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
 
         let db;
+        let storage;
         let isFirebaseReady = false;
-        const imageMap = new Map();
         let userInfo = null;
+        let currentExpandedCard = null;
 
         // تنظیم تقویم شمسی
         document.addEventListener('DOMContentLoaded', () => {
@@ -411,128 +417,140 @@
 
         // تعریف تابع toggleSection
         window.toggleSection = function(section) {
-            const travelForm = document.getElementById('travel-form');
-            const eventForm = document.getElementById('event-form');
-            const shopForm = document.getElementById('shop-form');
+            const travelFormCard = document.getElementById('travel-form-card');
+            const eventFormCard = document.getElementById('event-form-card');
+            const shopFormCard = document.getElementById('shop-form-card');
             const travelAds = document.getElementById('travel-ads');
             const eventAds = document.getElementById('event-ads');
             const shopAds = document.getElementById('shop-ads');
 
             // بستن همه فرم‌ها و بخش‌ها
-            travelForm.classList.remove('active');
-            eventForm.classList.remove('active');
-            shopForm.classList.remove('active');
+            travelFormCard.style.display = 'none';
+            eventFormCard.style.display = 'none';
+            shopFormCard.style.display = 'none';
             travelAds.style.display = 'none';
             eventAds.style.display = 'none';
             shopAds.style.display = 'none';
 
-            // تoggle کردن بخش مورد نظر
+            // نمایش بخش مورد نظر
             if (section === 'travel') {
-                if (travelForm.classList.contains('active')) {
-                    travelForm.classList.remove('active');
-                } else {
-                    travelForm.classList.add('active');
-                    travelAds.style.display = 'block';
-                    loadTravelAds();
-                }
+                travelFormCard.style.display = 'block';
+                travelAds.style.display = 'block';
+                loadTravelAds();
             } else if (section === 'event') {
-                if (eventForm.classList.contains('active')) {
-                    eventForm.classList.remove('active');
-                } else {
-                    eventForm.classList.add('active');
-                    eventAds.style.display = 'block';
-                    loadEventAds();
-                }
+                eventFormCard.style.display = 'block';
+                eventAds.style.display = 'block';
+                loadEventAds();
             } else if (section === 'shop') {
-                if (shopForm.classList.contains('active')) {
-                    shopForm.classList.remove('active');
-                } else {
-                    shopForm.classList.add('active');
-                    shopAds.style.display = 'block';
-                    loadShopAds();
-                }
+                shopFormCard.style.display = 'block';
+                shopAds.style.display = 'block';
+                loadShopAds();
             }
         };
 
-        // نمایش جزئیات توی همون کارت
-        function toggleCard(card, data, type, imageUrl, userId, userName) {
+        // تابع برای بستن کارت باز قبلی
+        function closeCurrentExpandedCard() {
+            if (currentExpandedCard) {
+                currentExpandedCard.classList.remove('expanded');
+                const content = currentExpandedCard.querySelector('.content');
+                const expandedContent = currentExpandedCard.querySelector('.expanded-content') || currentExpandedCard.querySelector('.form-content');
+                content.style.display = 'block';
+                expandedContent.style.display = 'none';
+                currentExpandedCard = null;
+            }
+        }
+
+        // تابع برای toggle کردن کارت‌ها
+        function toggleCard(card, data, type, imageUrl, userId, userName, userAvatar) {
+            const isFormCard = card.classList.contains('form-card');
             const isExpanded = card.classList.contains('expanded');
             const content = card.querySelector('.content');
-            const expandedContent = card.querySelector('.expanded-content');
+            const expandedContent = card.querySelector(isFormCard ? '.form-content' : '.expanded-content');
+
+            // بستن کارت باز قبلی
+            if (currentExpandedCard && currentExpandedCard !== card) {
+                closeCurrentExpandedCard();
+            }
 
             if (!isExpanded) {
                 card.classList.add('expanded');
                 content.style.display = 'none';
-                expandedContent.innerHTML = '';
-                if (type === 'travel') {
-                    expandedContent.innerHTML += `
-                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
-                        <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
-                        <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
-                        <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
-                        <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
-                        <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
-                        <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
-                        <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
-                        <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
-                        <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                        <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                        <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
-                        <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
-                        <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
-                        <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
-                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                    `;
-                } else if (type === 'event') {
-                    expandedContent.innerHTML += `
-                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
-                        <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
-                        <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
-                        <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
-                        <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
-                        <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
-                        <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
-                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                    `;
-                } else if (type === 'shop') {
-                    expandedContent.innerHTML += `
-                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
-                        <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
-                        <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
-                        <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
-                        <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
-                        <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
-                        <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
-                        <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
-                    `;
-                }
+                expandedContent.style.display = 'block';
+                currentExpandedCard = card;
 
-                // اضافه کردن لینک تماس با آگهی‌دهنده
-                if (userId && userId !== 'unknown') {
-                    expandedContent.innerHTML += `
-                        <div class="contact-link">
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                            <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
-                        </div>
-                    `;
-                } else if (data.phone) {
-                    expandedContent.innerHTML += `
-                        <div class="contact-link">
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="tel:${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
-                            <a href="tel:${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
-                        </div>
-                    `;
-                } else {
-                    expandedContent.innerHTML += `<p>اطلاعات تماس موجود نیست!</p>`;
+                if (!isFormCard) {
+                    expandedContent.innerHTML = '';
+                    if (type === 'travel') {
+                        expandedContent.innerHTML += `
+                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
+                            <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
+                            <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
+                            <p><strong>وسیله سفر:</strong> ${data.vehicle || 'نامشخص'}</p>
+                            <p><strong>مبدا:</strong> ${data.origin || 'نامشخص'}</p>
+                            <p><strong>مقصد:</strong> ${data.destination || 'نامشخص'}</p>
+                            <p><strong>تاریخ رفت:</strong> ${data.departure || 'نامشخص'}</p>
+                            <p><strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}</p>
+                            <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                            <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                            <p><strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}</p>
+                            <p><strong>شماره کارت:</strong> ${data.card || 'نامشخص'}</p>
+                            <p><strong>به نام:</strong> ${data.owner || 'نامشخص'}</p>
+                            <p><strong>تلفن:</strong> ${data.phone || 'نامشخص'}</p>
+                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                        `;
+                    } else if (type === 'event') {
+                        expandedContent.innerHTML += `
+                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
+                            <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
+                            <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
+                            <p><strong>مکان:</strong> ${data.location || 'نامشخص'}</p>
+                            <p><strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}</p>
+                            <p><strong>هزینه:</strong> ${data.cost || 'نامشخص'}</p>
+                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                        `;
+                    } else if (type === 'shop') {
+                        expandedContent.innerHTML += `
+                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
+                            <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
+                            <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
+                            <p><strong>سال تولید:</strong> ${data.year || 'نامشخص'}</p>
+                            <p><strong>قیمت:</strong> ${data.price || 'نامشخص'}</p>
+                            <p><strong>توضیحات:</strong> ${data.description || 'نامشخص'}</p>
+                            <p><strong>تاریخ ثبت:</strong> ${new Date(data.timestamp).toLocaleString('fa-IR')}</p>
+                        `;
+                    }
+
+                    // اضافه کردن لینک تماس با آگهی‌دهنده
+                    if (userId && userId !== 'unknown') {
+                        expandedContent.innerHTML += `
+                            <div class="contact-link">
+                                <img src="${userAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="آواتار">
+                                <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                                <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
+                            </div>
+                        `;
+                    } else if (data.phone) {
+                        expandedContent.innerHTML += `
+                            <div class="contact-link">
+                                <img src="${userAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" alt="آواتار">
+                                <a href="tel:${data.phone}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                                <a href="tel:${data.phone}" target="_blank">تماس با آگهی‌دهنده</a>
+                            </div>
+                        `;
+                    } else {
+                        expandedContent.innerHTML += `<p>اطلاعات تماس موجود نیست!</p>`;
+                    }
                 }
             } else {
                 card.classList.remove('expanded');
                 content.style.display = 'block';
-                expandedContent.innerHTML = '';
+                expandedContent.style.display = 'none';
+                currentExpandedCard = null;
             }
         }
 
@@ -552,6 +570,7 @@
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
+                storage = getStorage(app);
                 isFirebaseReady = true;
                 console.log("Firebase initialized successfully");
             } catch (error) {
@@ -566,6 +585,15 @@
 
         // گرفتن اطلاعات کاربر
         userInfo = tg.initDataUnsafe.user || {};
+        const userAvatar = userInfo && userInfo.photo_url ? userInfo.photo_url : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+        // تابع آپلود تصویر
+        async function uploadImage(file, timestamp) {
+            const storageRef = ref(storage, `images/${timestamp}_${file.name}`);
+            await uploadBytes(storageRef, file);
+            const imageUrl = await getDownloadURL(storageRef);
+            return imageUrl;
+        }
 
         // ثبت آگهی تورها
         document.getElementById('submit-travel').addEventListener('click', async () => {
@@ -574,6 +602,7 @@
                 return;
             }
 
+            const timestamp = new Date().toISOString();
             const travelData = {
                 organizer: document.getElementById('travel-organizer').value,
                 type: document.getElementById('travel-type').value,
@@ -592,19 +621,21 @@
                 description: document.getElementById('travel-description').value,
                 userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
-                timestamp: new Date().toISOString()
+                userAvatar: userAvatar,
+                timestamp: timestamp,
+                imageUrl: ''
             };
 
             const imageFile = document.getElementById('travel-image').files[0];
             if (imageFile) {
-                const imageUrl = URL.createObjectURL(imageFile);
-                imageMap.set(travelData.timestamp, imageUrl);
+                const imageUrl = await uploadImage(imageFile, timestamp);
+                travelData.imageUrl = imageUrl;
             }
 
             try {
                 await addDoc(collection(db, 'travels'), travelData);
                 alert('آگهی تور ثبت شد!');
-                document.getElementById('travel-form').classList.remove('active');
+                closeCurrentExpandedCard();
                 document.getElementById('travel-form').reset();
                 loadTravelAds();
             } catch (error) {
@@ -620,6 +651,7 @@
                 return;
             }
 
+            const timestamp = new Date().toISOString();
             const eventData = {
                 title: document.getElementById('event-title').value,
                 startDate: document.getElementById('event-date').value,
@@ -630,13 +662,14 @@
                 description: document.getElementById('event-description').value,
                 userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
-                timestamp: new Date().toISOString()
+                userAvatar: userAvatar,
+                timestamp: timestamp
             };
 
             try {
                 await addDoc(collection(db, 'events'), eventData);
                 alert('ایونت ثبت شد!');
-                document.getElementById('event-form').classList.remove('active');
+                closeCurrentExpandedCard();
                 document.getElementById('event-form').reset();
                 loadEventAds();
             } catch (error) {
@@ -652,6 +685,7 @@
                 return;
             }
 
+            const timestamp = new Date().toISOString();
             const shopData = {
                 status: document.getElementById('shop-status').value,
                 brand: document.getElementById('shop-brand').value,
@@ -661,19 +695,21 @@
                 description: document.getElementById('shop-description').value,
                 userId: userInfo ? userInfo.username || userInfo.id : 'unknown',
                 userName: userInfo ? userInfo.first_name : 'آگهی‌دهنده',
-                timestamp: new Date().toISOString()
+                userAvatar: userAvatar,
+                timestamp: timestamp,
+                imageUrl: ''
             };
 
             const imageFile = document.getElementById('shop-image').files[0];
             if (imageFile) {
-                const imageUrl = URL.createObjectURL(imageFile);
-                imageMap.set(shopData.timestamp, imageUrl);
+                const imageUrl = await uploadImage(imageFile, timestamp);
+                shopData.imageUrl = imageUrl;
             }
 
             try {
                 await addDoc(collection(db, 'shop'), shopData);
                 alert('محصول ثبت شد!');
-                document.getElementById('shop-form').classList.remove('active');
+                closeCurrentExpandedCard();
                 document.getElementById('shop-form').reset();
                 loadShopAds();
             } catch (error) {
@@ -696,7 +732,6 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
-                        const imageUrl = imageMap.get(data.timestamp);
                         adDiv.innerHTML = `
                             <div class="content">
                                 <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
@@ -706,7 +741,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'travel', imageUrl, data.userId, data.userName);
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'travel', data.imageUrl, data.userId, data.userName, data.userAvatar);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -737,7 +772,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'event', null, data.userId, data.userName);
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'event', null, data.userId, data.userName, data.userAvatar);
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -760,9 +795,8 @@
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
-                        const imageUrl = imageMap.get(data.timestamp);
                         adDiv.innerHTML = `
-                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="content">
                                 <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
                                 <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
@@ -770,7 +804,7 @@
                             </div>
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv, data, 'shop', imageUrl, data.userId, data.userName);
+                        adDiv.onclick = () => toggleCard(adDiv, data, 'shop', data.imageUrl, data.userId, data.userName, data.userAvatar);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
@@ -778,6 +812,11 @@
                 shopAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + error.message + '</p>';
             }
         }
+
+        // تنظیم کلیک روی کارت فرم‌ها
+        document.getElementById('travel-form-card').onclick = () => toggleCard(document.getElementById('travel-form-card'));
+        document.getElementById('event-form-card').onclick = () => toggleCard(document.getElementById('event-form-card'));
+        document.getElementById('shop-form-card').onclick = () => toggleCard(document.getElementById('shop-form-card'));
 
         // مقداردهی اولیه Firebase
         initFirebase();
