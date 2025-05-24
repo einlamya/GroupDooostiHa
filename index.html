@@ -64,6 +64,10 @@
             max-width: 33%;
             margin-left: auto;
             margin-right: auto;
+            transition: all 0.3s ease;
+        }
+        #travel-form.expanded, #event-form.expanded, #shop-form.expanded {
+            max-width: 100%;
         }
         #travel-ads, #event-ads, #shop-ads {
             display: none;
@@ -73,9 +77,14 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-top: 20px;
             text-align: right;
-            max-width: 33%;
+            max-width: 100%;
             margin-left: auto;
             margin-right: auto;
+        }
+        #travel-ads-list, #event-ads-list, #shop-ads-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
         .form-group {
             margin: 10px 0;
@@ -176,8 +185,14 @@
                 width: 50%;
                 max-width: 200px;
             }
-            #travel-form, #event-form, #shop-form, #travel-ads, #event-ads, #shop-ads {
+            #travel-form, #event-form, #shop-form {
                 max-width: 100%;
+            }
+            #travel-ads, #event-ads, #shop-ads {
+                max-width: 100%;
+            }
+            #travel-ads-list, #event-ads-list, #shop-ads-list {
+                grid-template-columns: 1fr;
             }
             .ad-card {
                 width: 100%;
@@ -195,12 +210,12 @@
     <h1>🧳 گروه دوستی‌ها</h1>
     <div class="category">
         <button onclick="showSection('event')">🫂 ایونت‌ها</button>
-        <button onclick="showSection('travel')">🏕️ گروه‌های سفر</button>
+        <button onclick="showSection('travel')">🏕️ تورها</button>
         <button onclick="showSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <form id="travel-form">
-        <h2>🏕️ ثبت آگهی گروه‌های سفر</h2>
+        <h2>🏕️ ثبت آگهی تورها</h2>
         <div class="form-group">
             <label>ارسال تصویر:</label>
             <input type="file" id="travel-image" accept="image/*">
@@ -218,7 +233,7 @@
         </div>
         <div class="form-group">
             <label>نام لیدر:</label>
-            <input type="text" id="travel-leader" placeholder="مثلاً: علی محمدی">
+            <input type="text" id="travel-leader" value="علی اکبری" placeholder="مثلاً: علی اکبری">
         </div>
         <div class="form-group">
             <label>وسیله سفر:</label>
@@ -264,7 +279,7 @@
         </div>
         <div class="form-group">
             <label>به نام:</label>
-            <input type="text" id="travel-owner" placeholder="مثلاً: علی محمدی">
+            <input type="text" id="travel-owner" value="علی اکبری" placeholder="مثلاً: علی اکبری">
         </div>
         <div class="form-group">
             <label>تلفن هماهنگی:</label>
@@ -356,7 +371,7 @@
         <button type="button" id="submit-shop">✅ ثبت محصول</button>
     </form>
     <div id="travel-ads">
-        <h2>🏕️ آگهی‌های گروه‌های سفر</h2>
+        <h2>🏕️ آگهی‌های تورها</h2>
         <div id="travel-ads-list"></div>
     </div>
     <div id="event-ads">
@@ -406,14 +421,17 @@
 
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
+                document.getElementById('travel-form').classList.add('expanded');
                 document.getElementById('travel-ads').style.display = 'block';
                 loadTravelAds();
             } else if (section === 'event') {
                 document.getElementById('event-form').style.display = 'block';
+                document.getElementById('event-form').classList.add('expanded');
                 document.getElementById('event-ads').style.display = 'block';
                 loadEventAds();
             } else if (section === 'shop') {
                 document.getElementById('shop-form').style.display = 'block';
+                document.getElementById('shop-form').classList.add('expanded');
                 document.getElementById('shop-ads').style.display = 'block';
                 loadShopAds();
             }
@@ -475,9 +493,9 @@
                 if (userId && userId !== 'unknown') {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
-                            <a href="https://t.me/+${data.phone || ''}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <a href="https://t.me/+${data.phone || userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="https://t.me/+${data.phone || ''}" target="_blank">تماس با آگهی‌دهنده</a>
+                            <a href="https://t.me/+${data.phone || userId}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
                 } else if (data.phone) {
@@ -527,7 +545,7 @@
         // گرفتن اطلاعات کاربر
         userInfo = tg.initDataUnsafe.user || {};
 
-        // ثبت آگهی سفر
+        // ثبت آگهی تورها
         document.getElementById('submit-travel').addEventListener('click', async () => {
             if (!isFirebaseReady) {
                 alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
@@ -563,7 +581,7 @@
 
             try {
                 await addDoc(collection(db, 'travels'), travelData);
-                alert('آگهی سفر ثبت شد!');
+                alert('آگهی تور ثبت شد!');
                 document.getElementById('travel-form').reset();
                 loadTravelAds();
             } catch (error) {
@@ -639,14 +657,14 @@
             }
         });
 
-        // بارگذاری آگهی‌های سفر
+        // بارگذاری آگهی‌های تورها
         async function loadTravelAds() {
             const travelAdsList = document.getElementById('travel-ads-list');
             travelAdsList.innerHTML = '';
             try {
                 const travelsSnapshot = await getDocs(collection(db, 'travels'));
                 if (travelsSnapshot.empty) {
-                    travelAdsList.innerHTML = '<p>آگهی سفری یافت نشد.</p>';
+                    travelAdsList.innerHTML = '<p>آگهی توری یافت نشد.</p>';
                 } else {
                     travelsSnapshot.forEach(doc => {
                         const data = doc.data();
