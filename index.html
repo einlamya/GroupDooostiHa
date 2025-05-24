@@ -65,8 +65,11 @@
             margin-left: auto;
             margin-right: auto;
             transition: all 0.3s ease;
+            overflow: hidden;
+            height: 0;
         }
         #travel-form.expanded, #event-form.expanded, #shop-form.expanded {
+            height: auto;
             max-width: 100%;
         }
         #travel-ads, #event-ads, #shop-ads {
@@ -126,7 +129,6 @@
             cursor: pointer;
             text-align: right;
             vertical-align: top;
-            position: relative;
             transition: all 0.3s ease;
         }
         .ad-card.expanded {
@@ -421,17 +423,17 @@
 
             if (section === 'travel') {
                 document.getElementById('travel-form').style.display = 'block';
-                document.getElementById('travel-form').classList.add('expanded');
+                setTimeout(() => document.getElementById('travel-form').classList.add('expanded'), 10);
                 document.getElementById('travel-ads').style.display = 'block';
                 loadTravelAds();
             } else if (section === 'event') {
                 document.getElementById('event-form').style.display = 'block';
-                document.getElementById('event-form').classList.add('expanded');
+                setTimeout(() => document.getElementById('event-form').classList.add('expanded'), 10);
                 document.getElementById('event-ads').style.display = 'block';
                 loadEventAds();
             } else if (section === 'shop') {
                 document.getElementById('shop-form').style.display = 'block';
-                document.getElementById('shop-form').classList.add('expanded');
+                setTimeout(() => document.getElementById('shop-form').classList.add('expanded'), 10);
                 document.getElementById('shop-ads').style.display = 'block';
                 loadShopAds();
             }
@@ -446,9 +448,10 @@
             if (!isExpanded) {
                 card.classList.add('expanded');
                 content.style.display = 'none';
-                expandedContent.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : '';
+                expandedContent.innerHTML = '';
                 if (type === 'travel') {
                     expandedContent.innerHTML += `
+                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
                         <p><strong>تور:</strong> ${data.organizer || 'نامشخص'}</p>
                         <p><strong>نوع سفر:</strong> ${data.type || 'نامشخص'}</p>
                         <p><strong>نام لیدر:</strong> ${data.leader || 'نامشخص'}</p>
@@ -468,6 +471,7 @@
                     `;
                 } else if (type === 'event') {
                     expandedContent.innerHTML += `
+                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
                         <p><strong>عنوان:</strong> ${data.title || 'نامشخص'}</p>
                         <p><strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}</p>
                         <p><strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}</p>
@@ -479,6 +483,7 @@
                     `;
                 } else if (type === 'shop') {
                     expandedContent.innerHTML += `
+                        ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
                         <p><strong>وضعیت:</strong> ${data.status || 'نامشخص'}</p>
                         <p><strong>برند:</strong> ${data.brand || 'نامشخص'}</p>
                         <p><strong>مدل:</strong> ${data.model || 'نامشخص'}</p>
@@ -493,9 +498,9 @@
                 if (userId && userId !== 'unknown') {
                     expandedContent.innerHTML += `
                         <div class="contact-link">
-                            <a href="https://t.me/+${data.phone || userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
+                            <a href="https://t.me/${userId}" target="_blank">${userName || 'آگهی‌دهنده'}</a>
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="آواتار">
-                            <a href="https://t.me/+${data.phone || userId}" target="_blank">تماس با آگهی‌دهنده</a>
+                            <a href="https://t.me/${userId}" target="_blank">تماس با آگهی‌دهنده</a>
                         </div>
                     `;
                 } else if (data.phone) {
@@ -672,7 +677,6 @@
                         adDiv.className = 'ad-card';
                         const imageUrl = imageMap.get(data.timestamp);
                         adDiv.innerHTML = `
-                            ${imageUrl ? `<img src="${imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="content">
                                 <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
                                 <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
