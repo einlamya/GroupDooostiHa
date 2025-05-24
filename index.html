@@ -69,10 +69,17 @@
             height: 60px;
             opacity: 1;
         }
-        .form-card .content, .ad-card .content {
+        .form-card .content {
             display: block;
             font-size: 20px;
             text-align: center;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .ad-card .content {
+            display: block;
+            font-size: 12px;
+            text-align: right;
             margin: 0 auto;
             padding: 10px;
         }
@@ -203,7 +210,7 @@
         <button onclick="toggleSection('shop')">🛍️ فروشگاه</button>
     </div>
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
-    <div id="travel-form-card" class="form-card">
+    <div id="travel-form-card" class="form-card" style="display: none;">
         <div class="content">
             <strong>📝 ثبت آگهی تور</strong>
         </div>
@@ -287,7 +294,7 @@
             </form>
         </div>
     </div>
-    <div id="event-form-card" class="form-card">
+    <div id="event-form-card" class="form-card" style="display: none;">
         <div class="content">
             <strong>📝 ثبت آگهی ایونت</strong>
         </div>
@@ -337,7 +344,7 @@
             </form>
         </div>
     </div>
-    <div id="shop-form-card" class="form-card">
+    <div id="shop-form-card" class="form-card" style="display: none;">
         <div class="content">
             <strong>📝 ثبت آگهی فروشگاه</strong>
         </div>
@@ -473,11 +480,6 @@
             const isExpanded = card.classList.contains('expanded');
             const content = card.querySelector('.content');
             const expandedContent = card.querySelector(isFormCard ? '.form-content' : '.expanded-content');
-
-            // جلوگیری از بستن با کلیک روی فیلدهای فرم
-            if (isFormCard && event.target.tagName !== 'DIV' && event.target.tagName !== 'STRONG') {
-                return;
-            }
 
             // بستن کارت باز قبلی
             if (currentExpandedCard && currentExpandedCard !== card) {
@@ -862,6 +864,17 @@
             if (event.target.tagName === 'DIV' || event.target.tagName === 'STRONG') {
                 toggleCard(document.getElementById('shop-form-card'));
             }
+        };
+
+        // جلوگیری از بسته شدن فرم هنگام کلیک روی دکمه ثبت
+        document.getElementById('submit-travel').onclick = (event) => {
+            event.stopPropagation();
+        };
+        document.getElementById('submit-event').onclick = (event) => {
+            event.stopPropagation();
+        };
+        document.getElementById('submit-shop').onclick = (event) => {
+            event.stopPropagation();
         };
 
         // مقداردهی اولیه Firebase
