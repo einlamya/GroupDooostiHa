@@ -11,11 +11,13 @@
       margin: 0 auto;
       padding: 20px;
       background-color: #f4f4f4;
+      direction: rtl;
+      text-align: right;
     }
     h1, h2, h3 {
       text-align: center;
     }
-    .form-container, .ads-container {
+    .form-container, .ads-container, .filter-container {
       margin: 20px 0;
       padding: 20px;
       background-color: #fff;
@@ -50,6 +52,20 @@
       margin: 10px;
       border-radius: 5px;
       background-color: #f9f9f9;
+      direction: rtl;
+      text-align: right;
+    }
+    .card img {
+      max-width: 100px;
+      border-radius: 5px;
+    }
+    .filter-container form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-container input[type="checkbox"] {
+      width: auto;
     }
   </style>
 </head>
@@ -93,21 +109,43 @@
     </form>
   </div>
 
+  <!-- فیلتر تورها -->
+  <div class="filter-container">
+    <h2>فیلتر تورها</h2>
+    <form id="tourFilterForm">
+      <select id="tourFilterType">
+        <option value="">همه انواع</option>
+        <option value="داخلی">داخلی</option>
+        <option value="خارجی">خارجی</option>
+      </select>
+      <input type="text" id="tourFilterDestination" placeholder="مقصد">
+      <input type="checkbox" id="tourNotify" name="tourNotify">
+      <label for="tourNotify">اعلان برای آگهی‌های جدید</label>
+      <button type="submit">فیلتر کن</button>
+    </form>
+  </div>
+
+  <!-- نمایش تورها -->
+  <div class="ads-container">
+    <h2>🏕️ آگهی‌های تورها</h2>
+    <div id="tourAds"></div>
+  </div>
+
   <!-- فرم ثبت ایونت -->
   <div class="form-container">
     <h2>🫂 ثبت آگهی ایونت</h2>
     <form id="eventForm">
       <select id="eventType" required>
         <option value="" disabled selected>عنوان</option>
-        <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
-        <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
-        <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
-        <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
-        <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
-        <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
-        <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
-        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
-        <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
+        <option value="دورهمی">دورهمی</option>
+        <option value="ورزش">ورزش</option>
+        <option value="کمپ و سفر">کمپ و سفر</option>
+        <option value="هم‌مسیر">هم‌مسیر</option>
+        <option value="دیوار دوستی">دیوار دوستی</option>
+        <option value="داوطلبانه">داوطلبانه</option>
+        <option value="واگذاری">واگذاری</option>
+        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی</option>
+        <option value="متفرقه">متفرقه</option>
         <option value="سایر">سایر</option>
       </select>
       <input type="date" id="eventStartDate" placeholder="تاریخ شروع" required>
@@ -116,9 +154,40 @@
       <input type="number" id="eventCapacity" placeholder="ظرفیت" required>
       <input type="number" id="eventCost" placeholder="هزینه" required>
       <textarea id="eventDescription" placeholder="توضیح بیشتر"></textarea>
+      <input type="file" id="eventImage" accept="image/*">
       <button type="submit">✅ ثبت ایونت</button>
       <button type="reset">🗑️ پاک کردن</button>
     </form>
+  </div>
+
+  <!-- فیلتر ایونت‌ها -->
+  <div class="filter-container">
+    <h2>فیلتر ایونت‌ها</h2>
+    <form id="eventFilterForm">
+      <select id="eventFilterType">
+        <option value="">همه انواع</option>
+        <option value="دورهمی">دورهمی</option>
+        <option value="ورزش">ورزش</option>
+        <option value="کمپ و سفر">کمپ و سفر</option>
+        <option value="هم‌مسیر">هم‌مسیر</option>
+        <option value="دیوار دوستی">دیوار دوستی</option>
+        <option value="داوطلبانه">داوطلبانه</option>
+        <option value="واگذاری">واگذاری</option>
+        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی</option>
+        <option value="متفرقه">متفرقه</option>
+        <option value="سایر">سایر</option>
+      </select>
+      <input type="text" id="eventFilterLocation" placeholder="مکان">
+      <input type="checkbox" id="eventNotify" name="eventNotify">
+      <label for="eventNotify">اعلان برای آگهی‌های جدید</label>
+      <button type="submit">فیلتر کن</button>
+    </form>
+  </div>
+
+  <!-- نمایش ایونت‌ها -->
+  <div class="ads-container">
+    <h2>🫂 آگهی‌های ایونت‌ها</h2>
+    <div id="eventAds"></div>
   </div>
 
   <!-- فرم ثبت فروشگاه -->
@@ -142,15 +211,24 @@
     </form>
   </div>
 
-  <!-- نمایش آگهی‌ها -->
-  <div class="ads-container">
-    <h2>🏕️ آگهی‌های تورها</h2>
-    <div id="tourAds"></div>
+  <!-- فیلتر محصولات فروشگاه -->
+  <div class="filter-container">
+    <h2>فیلتر محصولات فروشگاه</h2>
+    <form id="shopFilterForm">
+      <select id="shopFilterCondition">
+        <option value="">همه وضعیت‌ها</option>
+        <option value="نو">نو</option>
+        <option value="کارکرده">کارکرده</option>
+        <option value="در حد نو">در حد نو</option>
+      </select>
+      <input type="text" id="shopFilterBrand" placeholder="برند">
+      <input type="checkbox" id="shopNotify" name="shopNotify">
+      <label for="shopNotify">اعلان برای آگهی‌های جدید</label>
+      <button type="submit">فیلتر کن</button>
+    </form>
   </div>
-  <div class="ads-container">
-    <h2>🫂 آگهی‌های ایونت‌ها</h2>
-    <div id="eventAds"></div>
-  </div>
+
+  <!-- نمایش محصولات فروشگاه -->
   <div class="ads-container">
     <h2>🛍️ آگهی‌های فروشگاه</h2>
     <div id="shopAds"></div>
@@ -160,9 +238,11 @@
   <script type="module">
     // Import Firebase
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+    import { getMessaging, getToken } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js';
 
-    // تنظیمات Firebase (اینجا باید اطلاعات پروژه خودت رو بذاری)
+    // تنظیمات Firebase
     const firebaseConfig = {
 
 
@@ -180,11 +260,41 @@
     // راه‌اندازی Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
+    const messaging = getMessaging(app);
+
+    // درخواست اجازه برای نوتیفیکیشن
+    async function requestNotificationPermission() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' });
+          console.log('FCM Token:', token);
+          // اینجا می‌تونی توکن رو تو Firestore ذخیره کنی
+        }
+      } catch (error) {
+        console.error('خطا در گرفتن اجازه نوتیفیکیشن:', error);
+      }
+    }
+    requestNotificationPermission();
+
+    // آپلود عکس
+    async function uploadImage(file, path) {
+      if (!file) return '';
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    }
 
     // ثبت تور
     const tourForm = document.getElementById('tourForm');
     tourForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const imageFile = document.getElementById('tourImage').files[0];
+      let imageUrl = '';
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile, `tours/${Date.now()}_${imageFile.name}`);
+      }
       const tourData = {
         tourName: document.getElementById('tourName').value,
         tripType: document.getElementById('tripType').value,
@@ -201,7 +311,7 @@
         cardHolder: document.getElementById('cardHolder').value,
         phone: document.getElementById('phone').value,
         description: document.getElementById('description').value,
-        image: document.getElementById('tourImage').files[0] ? "image_uploaded" : ""
+        imageUrl: imageUrl
       };
       try {
         await addDoc(collection(db, "tours"), tourData);
@@ -218,6 +328,11 @@
     const eventForm = document.getElementById('eventForm');
     eventForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const imageFile = document.getElementById('eventImage').files[0];
+      let imageUrl = '';
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile, `events/${Date.now()}_${imageFile.name}`);
+      }
       const eventData = {
         eventType: document.getElementById('eventType').value,
         startDate: document.getElementById('eventStartDate').value,
@@ -225,7 +340,8 @@
         location: document.getElementById('location').value,
         capacity: parseInt(document.getElementById('eventCapacity').value),
         cost: parseInt(document.getElementById('eventCost').value),
-        description: document.getElementById('eventDescription').value
+        description: document.getElementById('eventDescription').value,
+        imageUrl: imageUrl
       };
       try {
         await addDoc(collection(db, "events"), eventData);
@@ -242,6 +358,11 @@
     const shopForm = document.getElementById('shopForm');
     shopForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const imageFile = document.getElementById('shopImage').files[0];
+      let imageUrl = '';
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile, `shop/${Date.now()}_${imageFile.name}`);
+      }
       const shopData = {
         condition: document.getElementById('productCondition').value,
         brand: document.getElementById('brand').value,
@@ -249,7 +370,7 @@
         productionYear: parseInt(document.getElementById('productionYear').value),
         price: parseInt(document.getElementById('price').value),
         description: document.getElementById('shopDescription').value,
-        image: document.getElementById('shopImage').files[0] ? "image_uploaded" : ""
+        imageUrl: imageUrl
       };
       try {
         await addDoc(collection(db, "shop"), shopData);
@@ -263,16 +384,24 @@
     });
 
     // نمایش تورها
-    async function loadTours() {
+    async function loadTours(filters = {}) {
       const tourAds = document.getElementById('tourAds');
       tourAds.innerHTML = '';
+      let q = collection(db, "tours");
+      if (filters.tripType) {
+        q = query(q, where("tripType", "==", filters.tripType));
+      }
+      if (filters.destination) {
+        q = query(q, where("destination", "==", filters.destination));
+      }
       try {
-        const querySnapshot = await getDocs(collection(db, "tours"));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const tour = doc.data();
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
+            ${tour.imageUrl ? `<img src="${tour.imageUrl}" alt="تصویر تور">` : ''}
             <h3>${tour.tourName}</h3>
             <p>نوع سفر: ${tour.tripType}</p>
             <p>لیدر: ${tour.leaderName}</p>
@@ -297,16 +426,24 @@
     }
 
     // نمایش ایونت‌ها
-    async function loadEvents() {
+    async function loadEvents(filters = {}) {
       const eventAds = document.getElementById('eventAds');
       eventAds.innerHTML = '';
+      let q = collection(db, "events");
+      if (filters.eventType) {
+        q = query(q, where("eventType", "==", filters.eventType));
+      }
+      if (filters.location) {
+        q = query(q, where("location", "==", filters.location));
+      }
       try {
-        const querySnapshot = await getDocs(collection(db, "events"));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const event = doc.data();
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
+            ${event.imageUrl ? `<img src="${event.imageUrl}" alt="تصویر ایونت">` : ''}
             <h3>${event.eventType}</h3>
             <p>تاریخ شروع: ${event.startDate}</p>
             <p>تاریخ پایان: ${event.endDate}</p>
@@ -323,16 +460,24 @@
     }
 
     // نمایش محصولات فروشگاه
-    async function loadShopItems() {
+    async function loadShopItems(filters = {}) {
       const shopAds = document.getElementById('shopAds');
       shopAds.innerHTML = '';
+      let q = collection(db, "shop");
+      if (filters.condition) {
+        q = query(q, where("condition", "==", filters.condition));
+      }
+      if (filters.brand) {
+        q = query(q, where("brand", "==", filters.brand));
+      }
       try {
-        const querySnapshot = await getDocs(collection(db, "shop"));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const item = doc.data();
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
+            ${item.imageUrl ? `<img src="${item.imageUrl}" alt="تصویر محصول">` : ''}
             <h3>${item.brand} ${item.model}</h3>
             <p>وضعیت: ${item.condition}</p>
             <p>سال تولید: ${item.productionYear}</p>
@@ -346,7 +491,112 @@
       }
     }
 
-    // لود همه آگهی‌ها موقع باز شدن صفحه
+    // فیلتر تورها
+    const tourFilterForm = document.getElementById('tourFilterForm');
+    tourFilterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const filters = {
+        tripType: document.getElementById('tourFilterType').value,
+        destination: document.getElementById('tourFilterDestination').value
+      };
+      loadTours(filters);
+    });
+
+    // فیلتر ایونت‌ها
+    const eventFilterForm = document.getElementById('eventFilterForm');
+    eventFilterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const filters = {
+        eventType: document.getElementById('eventFilterType').value,
+        location: document.getElementById('eventFilterLocation').value
+      };
+      loadEvents(filters);
+    });
+
+    // فیلتر محصولات فروشگاه
+    const shopFilterForm = document.getElementById('shopFilterForm');
+    shopFilterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const filters = {
+        condition: document.getElementById('shopFilterCondition').value,
+        brand: document.getElementById('shopFilterBrand').value
+      };
+      loadShopItems(filters);
+    });
+
+    // نوتیفیکیشن برای تورها
+    const tourNotifyCheckbox = document.getElementById('tourNotify');
+    tourNotifyCheckbox.addEventListener('change', () => {
+      if (tourNotifyCheckbox.checked) {
+        const filters = {
+          tripType: document.getElementById('tourFilterType').value,
+          destination: document.getElementById('tourFilterDestination').value
+        };
+        let q = collection(db, "tours");
+        if (filters.tripType) q = query(q, where("tripType", "==", filters.tripType));
+        if (filters.destination) q = query(q, where("destination", "==", filters.destination));
+        onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const tour = change.doc.data();
+              new Notification('تور جدید!', {
+                body: `تور ${tour.tourName} به مقصد ${tour.destination} اضافه شد!`
+              });
+            }
+          });
+        });
+      }
+    });
+
+    // نوتیفیکیشن برای ایونت‌ها
+    const eventNotifyCheckbox = document.getElementById('eventNotify');
+    eventNotifyCheckbox.addEventListener('change', () => {
+      if (eventNotifyCheckbox.checked) {
+        const filters = {
+          eventType: document.getElementById('eventFilterType').value,
+          location: document.getElementById('eventFilterLocation').value
+        };
+        let q = collection(db, "events");
+        if (filters.eventType) q = query(q, where("eventType", "==", filters.eventType));
+        if (filters.location) q = query(q, where("location", "==", filters.location));
+        onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const event = change.doc.data();
+              new Notification('ایونت جدید!', {
+                body: `ایونت ${event.eventType} در ${event.location} اضافه شد!`
+              });
+            }
+          });
+        });
+      }
+    });
+
+    // نوتیفیکیشن برای محصولات فروشگاه
+    const shopNotifyCheckbox = document.getElementById('shopNotify');
+    shopNotifyCheckbox.addEventListener('change', () => {
+      if (shopNotifyCheckbox.checked) {
+        const filters = {
+          condition: document.getElementById('shopFilterCondition').value,
+          brand: document.getElementById('shopFilterBrand').value
+        };
+        let q = collection(db, "shop");
+        if (filters.condition) q = query(q, where("condition", "==", filters.condition));
+        if (filters.brand) q = query(q, where("brand", "==", filters.brand));
+        onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const item = change.doc.data();
+              new Notification('محصول جدید!', {
+                body: `محصول ${item.brand} ${item.model} اضافه شد!`
+              });
+            }
+          });
+        });
+      }
+    });
+
+    // لود اولیه آگهی‌ها
     loadTours();
     loadEvents();
     loadShopItems();
