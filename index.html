@@ -248,19 +248,20 @@
     <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js" defer></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js" defer></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js" defer></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js" defer></script>
     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     <script type="module" defer>
         // وارد کردن توابع Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
 
         let db;
-        let storage;
         let isFirebaseReady = false;
         let userInfo = null;
         let currentExpandedCard = null;
+
+        // توکن ربات تلگرام (اینجا توکن خودت رو بذار)
+        const BOT_TOKEN = '7833464368:AAEWJY2yfdWevN8WLnMHpYIApS2ioDIFpRAE'; 
+        const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
         // تنظیم تقویم شمسی
         function initializeDatePicker() {
@@ -422,28 +423,11 @@
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
-                storage = getStorage(app);
                 isFirebaseReady = true;
                 console.log("Firebase initialized successfully");
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 alert('خطا در اتصال به سرور Firebase: ' + error.message);
-            }
-        }
-
-        // تابع برای آپلود تصویر به Firebase Storage
-        async function uploadImage(file) {
-            if (!file) return '';
-
-            const storageRef = ref(storage, `images/${Date.now()}_${file.name}`);
-            try {
-                const snapshot = await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(snapshot.ref);
-                return url;
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('خطا در آپلود تصویر: ' + error.message + ' (آگهی بدون تصویر ثبت می‌شود)');
-                return ''; // ادامه ثبت آگهی حتی اگه تصویر آپلود نشه
             }
         }
 
@@ -465,6 +449,53 @@
         const userAvatar = userInfo.photo_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         const userName = userInfo.first_name || 'آگهی‌دهنده';
 
+        // تابع آپلود خودکار به تلگرام
+        async function uploadImageToTelegram(file, chatId) {
+            if (!file) return '';
+
+            // بررسی اندازه فایل (تلگرام تا 20 مگابایت رو قبول می‌کنه)
+            const maxSize = 20 * 1024 * 1024; // 20 مگابایت
+            if (file.size > maxSize) {
+                alert('حجم فایل بیش از حد مجاز است (حداکثر 20 مگابایت)');
+                return '';
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', chatId || userId); // می‌تونی یه chat_id ثابت بذاری
+                formData.append('photo', file);
+
+                // ارسال عکس به تلگرام
+                const response = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (!result.ok) {
+                    throw new Error(result.description || 'خطا در آپلود به تلگرام');
+                }
+
+                // گرفتن file_id از پاسخ
+                const fileId = result.result.photo[result.result.photo.length - 1].file_id;
+
+                // گرفتن لینک مستقیم با متد getFile
+                const fileResponse = await fetch(`${TELEGRAM_API}/getFile?file_id=${fileId}`);
+                const fileResult = await fileResponse.json();
+                if (!fileResult.ok) {
+                    throw new Error(fileResult.description || 'خطا در گرفتن لینک فایل');
+                }
+
+                const filePath = fileResult.result.file_path;
+                const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
+                return fileUrl;
+            } catch (error) {
+                console.error('Error uploading image to Telegram:', error);
+                alert('خطا در آپلود تصویر به تلگرام: ' + error.message + ' (آگهی بدون تصویر ثبت می‌شود)');
+                return '';
+            }
+        }
+
         // ثبت آگهی تورها
         document.getElementById('submit-travel').addEventListener('click', async () => {
             if (!isFirebaseReady) {
@@ -477,7 +508,7 @@
 
             try {
                 if (imageFile) {
-                    imageUrl = await uploadImage(imageFile);
+                    imageUrl = await uploadImageToTelegram(imageFile);
                 }
 
                 const timestamp = new Date().toISOString();
@@ -501,7 +532,7 @@
                     userName: userName,
                     userAvatar: userAvatar,
                     timestamp: timestamp,
-                    imageUrl: imageUrl
+                    imageUrl: imageUrl || ''
                 };
 
                 await addDoc(collection(db, 'travels'), travelData);
@@ -562,7 +593,7 @@
 
             try {
                 if (imageFile) {
-                    imageUrl = await uploadImage(imageFile);
+                    imageUrl = await uploadImageToTelegram(imageFile);
                 }
 
                 const timestamp = new Date().toISOString();
@@ -577,7 +608,7 @@
                     userName: userName,
                     userAvatar: userAvatar,
                     timestamp: timestamp,
-                    imageUrl: imageUrl
+                    imageUrl: imageUrl || ''
                 };
 
                 await addDoc(collection(db, 'shop'), shopData);
