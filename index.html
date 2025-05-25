@@ -64,19 +64,20 @@
         }
         .form-card .header {
             display: flex;
-            justify-content: flex-start; /* دکمه به سمت چپ منتقل شد */
+            justify-content: flex-start; /* دکمه به سمت چپ، عنوان به راست */
             align-items: center;
         }
         .ad-card .content {
             display: flex;
             flex-direction: column;
-            justify-content: center; /* وسط‌چین عمودی */
-            align-items: flex-end; /* راست‌چین */
+            justify-content: center;
+            align-items: flex-end;
             font-size: 14px;
             text-align: right;
+            direction: rtl;
             margin: 0;
             padding: 10px;
-            min-height: 50px; /* برای اطمینان از تراز عمودی */
+            min-height: 50px;
         }
         .form-card .content {
             font-size: 14px;
@@ -84,27 +85,28 @@
             margin: 0;
             padding: 10px 0;
         }
-        .form-card .form-content, .ad-card .expanded-content {
+        .ad-card .expanded-content {
             display: none;
             margin-top: 10px;
             text-align: right;
-        }
-        .form-card.expanded {
-            max-height: 1200px; /* برای فرم‌های بلند */
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            overflow-y: auto; /* اسکرول عمودی */
-        }
-        .ad-card.expanded {
-            max-height: 600px; /* برای کارت‌های آگهی */
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            direction: rtl;
         }
         .form-card.expanded .form-content {
             display: block;
         }
         .ad-card.expanded .expanded-content {
             display: block;
+        }
+        .form-card.expanded {
+            max-height: 1200px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+        .ad-card.expanded {
+            max-height: 600px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
         .toggle-button {
             background-color: #008CBA;
@@ -114,6 +116,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
+            margin-left: 10px; /* فاصله از عنوان */
         }
         .toggle-button:hover {
             background-color: #007399;
@@ -326,6 +329,8 @@
         function closeCurrentExpandedCard() {
             if (currentExpandedCard) {
                 currentExpandedCard.classList.remove('expanded');
+                const toggleButton = currentExpandedCard.querySelector('.toggle-button');
+                if (toggleButton) toggleButton.textContent = 'باز کردن';
                 currentExpandedCard = null;
             }
         }
@@ -336,57 +341,61 @@
                 closeCurrentExpandedCard();
                 card.classList.add('expanded');
                 currentExpandedCard = card;
-
-                // پر کردن محتوای باز شده (فقط برای آگهی‌ها)
-                if (card.classList.contains('ad-card')) {
-                    const expandedContent = card.querySelector('.expanded-content');
-                    const data = card.data;
-                    if (card.type === 'travel') {
-                        expandedContent.innerHTML = `
-                            <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
-                            <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
-                            <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
-                            <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
-                            <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
-                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                            <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
-                            <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
-                            <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
-                            <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    } else if (card.type === 'event') {
-                        expandedContent.innerHTML = `
-                            <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
-                            <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
-                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    } else if (card.type === 'shop') {
-                        expandedContent.innerHTML = `
-                            <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
-                            <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    }
-                }
+                const toggleButton = card.querySelector('.toggle-button');
+                if (toggleButton) toggleButton.textContent = 'بستن';
             } else {
                 card.classList.remove('expanded');
                 currentExpandedCard = null;
+                const toggleButton = card.querySelector('.toggle-button');
+                if (toggleButton) toggleButton.textContent = 'باز کردن';
+            }
+
+            // پر کردن محتوای باز شده (فقط برای آگهی‌ها)
+            if (card.classList.contains('ad-card')) {
+                const expandedContent = card.querySelector('.expanded-content');
+                const data = card.data;
+                if (card.type === 'travel') {
+                    expandedContent.innerHTML = `
+                        <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
+                        <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
+                        <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
+                        <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
+                        <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
+                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                        <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
+                        <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
+                        <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
+                        <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                } else if (card.type === 'event') {
+                    expandedContent.innerHTML = `
+                        <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
+                        <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
+                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                } else if (card.type === 'shop') {
+                    expandedContent.innerHTML = `
+                        <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
+                        <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                }
             }
         };
 
@@ -400,14 +409,12 @@
         // مقداردهی Firebase
         async function initFirebase() {
             const firebaseConfig = {
-
-
-		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
-		  authDomain: "doostihagroupapp.firebaseapp.com",
-		  projectId: "doostihagroupapp",
-		  storageBucket: "doostihagroupapp.firebasestorage.app",
-		  messagingSenderId: "746714229972",
-		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
+                apiKey: "YOUR_API_KEY",
+                authDomain: "YOUR_AUTH_DOMAIN",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_STORAGE_BUCKET",
+                messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                appId: "YOUR_APP_ID"
             };
 
             try {
@@ -737,7 +744,7 @@
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <div id="travel-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
+            <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
                 <strong>📝 ثبت آگهی تور</strong>
             </div>
@@ -825,7 +832,7 @@
     </div>
     <div id="event-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
+            <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
                 <strong>📝 ثبت آگهی ایونت</strong>
             </div>
@@ -886,7 +893,7 @@
     </div>
     <div id="shop-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
+            <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
                 <strong>📝 ثبت آگهی فروشگاه</strong>
             </div>
