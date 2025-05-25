@@ -64,7 +64,7 @@
         }
         .form-card .header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start; /* دکمه به سمت چپ منتقل شد */
             align-items: center;
         }
         .ad-card .content {
@@ -332,57 +332,57 @@
 
         // تابع برای toggle کردن کارت‌ها
         window.toggleCard = function(card) {
-            const isExpanded = card.classList.contains('expanded');
-
-            if (!isExpanded) {
+            if (!card.classList.contains('expanded')) {
                 closeCurrentExpandedCard();
                 card.classList.add('expanded');
                 currentExpandedCard = card;
 
-                // پر کردن محتوای باز شده
-                const expandedContent = card.querySelector('.expanded-content');
-                const data = card.data;
-                if (card.type === 'travel') {
-                    expandedContent.innerHTML = `
-                        <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
-                        <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
-                        <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
-                        <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
-                        <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
-                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                        <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
-                        <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
-                        <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
-                        <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
-                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                        <div class="contact-link">
-                            <img src="${data.userAvatar}" alt="آواتار">
-                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                        </div>
-                    `;
-                } else if (card.type === 'event') {
-                    expandedContent.innerHTML = `
-                        <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
-                        <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
-                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                        <div class="contact-link">
-                            <img src="${data.userAvatar}" alt="آواتار">
-                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                        </div>
-                    `;
-                } else if (card.type === 'shop') {
-                    expandedContent.innerHTML = `
-                        <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
-                        <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
-                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                        <div class="contact-link">
-                            <img src="${data.userAvatar}" alt="آواتار">
-                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                        </div>
-                    `;
+                // پر کردن محتوای باز شده (فقط برای آگهی‌ها)
+                if (card.classList.contains('ad-card')) {
+                    const expandedContent = card.querySelector('.expanded-content');
+                    const data = card.data;
+                    if (card.type === 'travel') {
+                        expandedContent.innerHTML = `
+                            <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
+                            <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
+                            <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
+                            <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
+                            <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
+                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                            <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
+                            <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
+                            <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
+                            <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
+                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                            <div class="contact-link">
+                                <img src="${data.userAvatar}" alt="آواتار">
+                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                            </div>
+                        `;
+                    } else if (card.type === 'event') {
+                        expandedContent.innerHTML = `
+                            <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
+                            <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
+                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                            <div class="contact-link">
+                                <img src="${data.userAvatar}" alt="آواتار">
+                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                            </div>
+                        `;
+                    } else if (card.type === 'shop') {
+                        expandedContent.innerHTML = `
+                            <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
+                            <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
+                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                            <div class="contact-link">
+                                <img src="${data.userAvatar}" alt="آواتار">
+                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                            </div>
+                        `;
+                    }
                 }
             } else {
                 card.classList.remove('expanded');
@@ -400,6 +400,8 @@
         // مقداردهی Firebase
         async function initFirebase() {
             const firebaseConfig = {
+
+
 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
 		  authDomain: "doostihagroupapp.firebaseapp.com",
 		  projectId: "doostihagroupapp",
@@ -735,7 +737,7 @@
     <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
     <div id="travel-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <button id="travel-toggle-button" class="toggle-button" onclick="toggleCard('travel-form-card', 'travel-toggle-button')">باز کردن</button>
+            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
             <div class="content">
                 <strong>📝 ثبت آگهی تور</strong>
             </div>
@@ -823,7 +825,7 @@
     </div>
     <div id="event-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <button id="event-toggle-button" class="toggle-button" onclick="toggleCard('event-form-card', 'event-toggle-button')">باز کردن</button>
+            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
             <div class="content">
                 <strong>📝 ثبت آگهی ایونت</strong>
             </div>
@@ -884,7 +886,7 @@
     </div>
     <div id="shop-form-card" class="form-card" style="display: none;">
         <div class="header">
-            <button id="shop-toggle-button" class="toggle-button" onclick="toggleCard('shop-form-card', 'shop-toggle-button')">باز کردن</button>
+            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
             <div class="content">
                 <strong>📝 ثبت آگهی فروشگاه</strong>
             </div>
