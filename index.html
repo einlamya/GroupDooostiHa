@@ -1,405 +1,169 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>گروه دوستی‌ها</title>
-    <link href="https://cdn.jsdelivr.net/npm/@persian-tools/persian-fonts@1.0.0/dist/IRANSans.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'IRANSans', 'Vazir', Arial, sans-serif;
-            text-align: center;
-            direction: rtl;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        .category {
-            margin: 20px auto;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            justify-items: center;
-            max-width: 600px;
-        }
-        .category button {
-            padding: 15px 30px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            width: 30%;
-            max-width: 165px;
-            box-sizing: border-box;
-        }
-        .category button:hover {
-            background-color: #45a049;
-        }
-        .slogan {
-            font-family: 'IRANSans', 'Vazir', sans-serif;
-            font-size: 16px;
-            color: #666;
-            margin-top: 10px;
-            font-weight: 700;
-        }
-        .form-card, .ad-card {
-            width: 33%;
-            margin: 10px auto;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-            text-align: right;
-            transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
-            overflow: hidden;
-            max-height: 100px; /* برای کارت‌های آگهی */
-            opacity: 1;
-        }
-        .form-card .header {
-            display: flex;
-            justify-content: flex-start; /* دکمه به سمت چپ منتقل شد */
-            align-items: center;
-        }
-        .ad-card .content {
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* وسط‌چین عمودی */
-            align-items: flex-end; /* راست‌چین */
-            font-size: 14px;
-            text-align: right;
-            margin: 0;
-            padding: 10px;
-            min-height: 50px; /* برای اطمینان از تراز عمودی */
-        }
-        .form-card .content {
-            font-size: 14px;
-            text-align: right;
-            margin: 0;
-            padding: 10px 0;
-        }
-        .form-card .form-content, .ad-card .expanded-content {
-            display: none;
-            margin-top: 10px;
-            text-align: right;
-        }
-        .form-card.expanded {
-            max-height: 1200px; /* برای فرم‌های بلند */
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            overflow-y: auto; /* اسکرول عمودی */
-        }
-        .ad-card.expanded {
-            max-height: 600px; /* برای کارت‌های آگهی */
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        }
-        .form-card.expanded .form-content {
-            display: block;
-        }
-        .ad-card.expanded .expanded-content {
-            display: block;
-        }
-        .toggle-button {
-            background-color: #008CBA;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toggle-button:hover {
-            background-color: #007399;
-        }
-        #travel-ads, #event-ads, #shop-ads {
-            display: none;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            text-align: right;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        #travel-ads-list, #event-ads-list, #shop-ads-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        .form-group {
-            margin: 10px 0;
-            text-align: right;
-        }
-        .form-group label {
-            display: block;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 90%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .form-group input::placeholder {
-            color: #999;
-        }
-        #submit-travel, #submit-event, #submit-shop {
-            background-color: #008CBA;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        #submit-travel:hover, #submit-event:hover, #submit-shop:hover {
-            background-color: #007399;
-        }
-        .ad-card img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 5px;
-            float: right;
-            margin-left: 10px;
-        }
-        .ad-card .expanded-img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .contact-link {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            margin-top: 15px;
-        }
-        .contact-link img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-        .contact-link a {
-            color: #008CBA;
-            text-decoration: none;
-            margin-left: 5px;
-        }
-        .contact-link a:hover {
-            text-decoration: underline;
-        }
-        .reset-button {
-            background-color: #f44336;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        .reset-button:hover {
-            background-color: #d32f2f;
-        }
-        @media (max-width: 768px) {
-            .category {
-                grid-template-columns: 1fr;
-            }
-            .category button {
-                width: 50%;
-                max-width: 200px;
-            }
-            .form-card, .ad-card {
-                width: 100%;
-            }
-            #travel-ads, #event-ads, #shop-ads {
-                max-width: 100%;
-            }
-            .ad-card {
-                flex: 0 0 calc(100% - 10px);
-            }
-            .ad-card.expanded {
-                flex: 0 0 90%;
-            }
-            body {
-                font-family: 'Vazir', Arial, sans-serif;
-            }
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js" defer></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js" defer></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js" defer></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js" defer></script>
-    <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
-    <script type="module" defer>
-        // وارد کردن توابع Firebase
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>گروه دوستی‌ها</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .form-container, .ads-container {
+      margin: 20px 0;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input, select, textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button[type="reset"] {
+      background-color: #dc3545;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧳 گروه دوستی‌ها</h1>
+  <p style="text-align: center;">دوستی‌ها از اینجا آغاز می‌شوند</p>
 
-        let db;
-        let storage;
-        let isFirebaseReady = false;
-        let userInfo = null;
-        let currentExpandedCard = null;
+  <!-- فرم ثبت تور -->
+  <div class="form-container">
+    <h2>🏕️ ثبت آگهی تورها</h2>
+    <form id="tourForm">
+      <input type="text" id="tourName" placeholder="نام برگزارکننده (نام تور)" required>
+      <select id="tripType" required>
+        <option value="" disabled selected>نوع سفر</option>
+        <option value="داخلی">داخلی</option>
+        <option value="خارجی">خارجی</option>
+      </select>
+      <input type="text" id="leaderName" placeholder="نام لیدر" required>
+      <select id="transport" required>
+        <option value="" disabled selected>وسیله سفر</option>
+        <option value="خودرو شخصی">خودرو شخصی</option>
+        <option value="اتوبوس">اتوبوس</option>
+        <option value="هواپیما">هواپیما</option>
+        <option value="هیچ‌هایک">هیچ‌هایک</option>
+        <option value="سایر">سایر</option>
+      </select>
+      <input type="text" id="origin" placeholder="مبدا" required>
+      <input type="text" id="destination" placeholder="مقصد" required>
+      <input type="date" id="startDate" placeholder="تاریخ رفت" required>
+      <input type="date" id="endDate" placeholder="تاریخ برگشت" required>
+      <input type="number" id="capacity" placeholder="ظرفیت باقی‌مانده" required>
+      <input type="number" id="cost" placeholder="هزینه" required>
+      <input type="number" id="extraCost" placeholder="هزینه اضافی">
+      <input type="text" id="cardNumber" placeholder="شماره کارت واریزی" required>
+      <input type="text" id="cardHolder" placeholder="به نام" required>
+      <input type="tel" id="phone" placeholder="تلفن هماهنگی" required>
+      <textarea id="description" placeholder="توضیحات بیشتر"></textarea>
+      <input type="file" id="tourImage" accept="image/*">
+      <button type="submit">✅ ثبت آگهی</button>
+      <button type="reset">🗑️ پاک کردن</button>
+    </form>
+  </div>
 
-        // تنظیم تقویم شمسی
-        function initializeDatePicker() {
-            if (typeof jQuery === 'undefined') {
-                console.error("jQuery is not loaded.");
-                return;
-            }
-            if (typeof persianDate === 'undefined' || typeof persianDatepicker === 'undefined') {
-                console.error("Persian Date or Datepicker library not loaded.");
-                return;
-            }
+  <!-- فرم ثبت ایونت -->
+  <div class="form-container">
+    <h2>🫂 ثبت آگهی ایونت</h2>
+    <form id="eventForm">
+      <select id="eventType" required>
+        <option value="" disabled selected>عنوان</option>
+        <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
+        <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
+        <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
+        <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
+        <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
+        <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
+        <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
+        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
+        <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
+        <option value="سایر">سایر</option>
+      </select>
+      <input type="date" id="eventStartDate" placeholder="تاریخ شروع" required>
+      <input type="date" id="eventEndDate" placeholder="تاریخ پایان" required>
+      <input type="text" id="location" placeholder="مکان" required>
+      <input type="number" id="eventCapacity" placeholder="ظرفیت" required>
+      <input type="number" id="eventCost" placeholder="هزینه" required>
+      <textarea id="eventDescription" placeholder="توضیح بیشتر"></textarea>
+      <button type="submit">✅ ثبت ایونت</button>
+      <button type="reset">🗑️ پاک کردن</button>
+    </form>
+  </div>
 
-            const today = new persianDate().format('YYYY/MM/DD');
-            jQuery('.persian-date').each(function() {
-                jQuery(this).persianDatepicker({
-                    initialValue: today,
-                    format: 'YYYY/MM/DD',
-                    autoClose: true,
-                    toolbox: {
-                        calendarSwitch: {
-                            enabled: false
-                        }
-                    }
-                });
-            });
-        }
+  <!-- فرم ثبت فروشگاه -->
+  <div class="form-container">
+    <h2>🛍️ ثبت آگهی فروشگاه</h2>
+    <form id="shopForm">
+      <select id="productCondition" required>
+        <option value="" disabled selected>وضعیت محصول</option>
+        <option value="نو">نو</option>
+        <option value="کارکرده">کارکرده</option>
+        <option value="در حد نو">در حد نو</option>
+      </select>
+      <input type="text" id="brand" placeholder="برند کالا" required>
+      <input type="text" id="model" placeholder="مدل" required>
+      <input type="number" id="productionYear" placeholder="سال تولید" required>
+      <input type="number" id="price" placeholder="قیمت" required>
+      <textarea id="shopDescription" placeholder="توضیحات بیشتر"></textarea>
+      <input type="file" id="shopImage" accept="image/*">
+      <button type="submit">✅ ثبت محصول</button>
+      <button type="reset">🗑️ پاک کردن</button>
+    </form>
+  </div>
 
-        // اطمینان از لود شدن اسکریپت‌ها
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initializeDatePicker, 500);
-            initFirebase();
-        });
+  <!-- نمایش آگهی‌ها -->
+  <div class="ads-container">
+    <h2>🏕️ آگهی‌های تورها</h2>
+    <div id="tourAds"></div>
+  </div>
+  <div class="ads-container">
+    <h2>🫂 آگهی‌های ایونت‌ها</h2>
+    <div id="eventAds"></div>
+  </div>
+  <div class="ads-container">
+    <h2>🛍️ آگهی‌های فروشگاه</h2>
+    <div id="shopAds"></div>
+  </div>
 
-        // تعریف تابع toggleSection
-        window.toggleSection = function(section) {
-            const travelFormCard = document.getElementById('travel-form-card');
-            const eventFormCard = document.getElementById('event-form-card');
-            const shopFormCard = document.getElementById('shop-form-card');
-            const travelAds = document.getElementById('travel-ads');
-            const eventAds = document.getElementById('event-ads');
-            const shopAds = document.getElementById('shop-ads');
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-            // بستن همه فرم‌ها و بخش‌ها
-            travelFormCard.style.display = 'none';
-            eventFormCard.style.display = 'none';
-            shopFormCard.style.display = 'none';
-            travelAds.style.display = 'none';
-            eventAds.style.display = 'none';
-            shopAds.style.display = 'none';
-
-            // نمایش بخش مورد نظر
-            if (section === 'travel') {
-                travelFormCard.style.display = 'block';
-                travelAds.style.display = 'block';
-                loadTravelAds();
-            } else if (section === 'event') {
-                eventFormCard.style.display = 'block';
-                eventAds.style.display = 'block';
-                loadEventAds();
-            } else if (section === 'shop') {
-                shopFormCard.style.display = 'block';
-                shopAds.style.display = 'block';
-                loadShopAds();
-            }
-        };
-
-        // تابع برای بستن کارت باز قبلی
-        function closeCurrentExpandedCard() {
-            if (currentExpandedCard) {
-                currentExpandedCard.classList.remove('expanded');
-                currentExpandedCard = null;
-            }
-        }
-
-        // تابع برای toggle کردن کارت‌ها
-        window.toggleCard = function(card) {
-            if (!card.classList.contains('expanded')) {
-                closeCurrentExpandedCard();
-                card.classList.add('expanded');
-                currentExpandedCard = card;
-
-                // پر کردن محتوای باز شده (فقط برای آگهی‌ها)
-                if (card.classList.contains('ad-card')) {
-                    const expandedContent = card.querySelector('.expanded-content');
-                    const data = card.data;
-                    if (card.type === 'travel') {
-                        expandedContent.innerHTML = `
-                            <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
-                            <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
-                            <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
-                            <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
-                            <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
-                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                            <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
-                            <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
-                            <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
-                            <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    } else if (card.type === 'event') {
-                        expandedContent.innerHTML = `
-                            <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
-                            <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
-                            <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    } else if (card.type === 'shop') {
-                        expandedContent.innerHTML = `
-                            <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
-                            <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
-                            <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
-                            <div class="contact-link">
-                                <img src="${data.userAvatar}" alt="آواتار">
-                                <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
-                            </div>
-                        `;
-                    }
-                }
-            } else {
-                card.classList.remove('expanded');
-                currentExpandedCard = null;
-            }
-        };
-
-        // جلوگیری از بسته شدن فرم با کلیک توی فرم
-        document.querySelectorAll('.form-content').forEach(formContent => {
-            formContent.addEventListener('click', (event) => {
-                event.stopPropagation();
-            });
-        });
-
-        // مقداردهی Firebase
-        async function initFirebase() {
-            const firebaseConfig = {
+    // تنظیمات Firebase (اینجا باید اطلاعات پروژه خودت رو بذاری)
+    const firebaseConfig = {
 
 
 		  apiKey: "AIzaSyCfMjevdSohHrq6dJxdlrmJ0MZT5HZKZAw",
@@ -408,540 +172,184 @@
 		  storageBucket: "doostihagroupapp.firebasestorage.app",
 		  messagingSenderId: "746714229972",
 		  appId: "1:746714229972:web:72a26758b58e2ede009f41"
-            };
 
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                storage = getStorage(app);
-                isFirebaseReady = true;
-                console.log("Firebase initialized successfully");
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                alert('خطا در اتصال به سرور Firebase: ' + error.message);
-            }
-        }
 
-        // تابع برای آپلود تصویر به Firebase Storage
-        async function uploadImage(file) {
-            if (!file) return '';
 
-            const storageRef = ref(storage, `images/${Date.now()}_${file.name}`);
-            try {
-                const snapshot = await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(snapshot.ref);
-                return url;
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('خطا در آپلود تصویر: ' + error.message + ' (آگهی بدون تصویر ثبت می‌شود)');
-                return ''; // ادامه ثبت آگهی حتی اگه تصویر آپلود نشه
-            }
-        }
+    };
 
-        // تنظیمات Telegram Web App
-        const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.MainButton.setText("بستن").show().onClick(() => tg.close());
-        }
+    // راه‌اندازی Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // گرفتن اطلاعات کاربر
-        userInfo = tg?.initDataUnsafe.user || {};
-        let userId = userInfo.username || (userInfo.id ? String(userInfo.id) : null);
-        if (!userId) {
-            console.warn('User ID not found, using temporary ID');
-            userId = 'temp_user_' + Date.now(); // پیش‌فرض موقت اگه آیدی پیدا نشد
-            alert('هشدار: آیدی کاربر تشخیص داده نشد. لطفاً دوباره وارد شوید.');
-        }
-        const userAvatar = userInfo.photo_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-        const userName = userInfo.first_name || 'آگهی‌دهنده';
+    // ثبت تور
+    const tourForm = document.getElementById('tourForm');
+    tourForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const tourData = {
+        tourName: document.getElementById('tourName').value,
+        tripType: document.getElementById('tripType').value,
+        leaderName: document.getElementById('leaderName').value,
+        transport: document.getElementById('transport').value,
+        origin: document.getElementById('origin').value,
+        destination: document.getElementById('destination').value,
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+        capacity: parseInt(document.getElementById('capacity').value),
+        cost: parseInt(document.getElementById('cost').value),
+        extraCost: parseInt(document.getElementById('extraCost').value) || 0,
+        cardNumber: document.getElementById('cardNumber').value,
+        cardHolder: document.getElementById('cardHolder').value,
+        phone: document.getElementById('phone').value,
+        description: document.getElementById('description').value,
+        image: document.getElementById('tourImage').files[0] ? "image_uploaded" : ""
+      };
+      try {
+        await addDoc(collection(db, "tours"), tourData);
+        alert("تور با موفقیت ثبت شد!");
+        tourForm.reset();
+        loadTours();
+      } catch (error) {
+        console.error("خطا تو ثبت تور:", error);
+        alert("یه مشکلی پیش اومد! دوباره امتحان کن.");
+      }
+    });
 
-        // ثبت آگهی تورها
-        document.getElementById('submit-travel').addEventListener('click', async () => {
-            if (!isFirebaseReady) {
-                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
-                return;
-            }
+    // ثبت ایونت
+    const eventForm = document.getElementById('eventForm');
+    eventForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const eventData = {
+        eventType: document.getElementById('eventType').value,
+        startDate: document.getElementById('eventStartDate').value,
+        endDate: document.getElementById('eventEndDate').value,
+        location: document.getElementById('location').value,
+        capacity: parseInt(document.getElementById('eventCapacity').value),
+        cost: parseInt(document.getElementById('eventCost').value),
+        description: document.getElementById('eventDescription').value
+      };
+      try {
+        await addDoc(collection(db, "events"), eventData);
+        alert("ایونت با موفقیت ثبت شد!");
+        eventForm.reset();
+        loadEvents();
+      } catch (error) {
+        console.error("خطا تو ثبت ایونت:", error);
+        alert("یه مشکلی پیش اومد! دوباره امتحان کن.");
+      }
+    });
 
-            const imageFile = document.getElementById('travel-image').files[0];
-            let imageUrl = '';
+    // ثبت محصول فروشگاه
+    const shopForm = document.getElementById('shopForm');
+    shopForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const shopData = {
+        condition: document.getElementById('productCondition').value,
+        brand: document.getElementById('brand').value,
+        model: document.getElementById('model').value,
+        productionYear: parseInt(document.getElementById('productionYear').value),
+        price: parseInt(document.getElementById('price').value),
+        description: document.getElementById('shopDescription').value,
+        image: document.getElementById('shopImage').files[0] ? "image_uploaded" : ""
+      };
+      try {
+        await addDoc(collection(db, "shop"), shopData);
+        alert("محصول با موفقیت ثبت شد!");
+        shopForm.reset();
+        loadShopItems();
+      } catch (error) {
+        console.error("خطا تو ثبت محصول:", error);
+        alert("یه مشکلی پیش اومد! دوباره امتحان کن.");
+      }
+    });
 
-            try {
-                if (imageFile) {
-                    imageUrl = await uploadImage(imageFile);
-                }
-
-                const timestamp = new Date().toISOString();
-                const travelData = {
-                    organizer: document.getElementById('travel-organizer').value,
-                    type: document.getElementById('travel-type').value,
-                    leader: document.getElementById('travel-leader').value,
-                    vehicle: document.getElementById('travel-vehicle').value,
-                    origin: document.getElementById('travel-origin').value,
-                    destination: document.getElementById('travel-destination').value,
-                    departure: document.getElementById('travel-departure').value,
-                    return: document.getElementById('travel-return').value,
-                    capacity: document.getElementById('travel-capacity').value,
-                    cost: document.getElementById('travel-cost').value,
-                    extraCost: document.getElementById('travel-extra-cost').value,
-                    card: document.getElementById('travel-card').value,
-                    owner: document.getElementById('travel-owner').value,
-                    phone: document.getElementById('travel-phone').value,
-                    description: document.getElementById('travel-description').value,
-                    userId: userId,
-                    userName: userName,
-                    userAvatar: userAvatar,
-                    timestamp: timestamp,
-                    imageUrl: imageUrl
-                };
-
-                await addDoc(collection(db, 'travels'), travelData);
-                alert('آگهی تور ثبت شد!');
-                closeCurrentExpandedCard();
-                document.getElementById('travel-form').reset();
-                loadTravelAds();
-            } catch (error) {
-                alert('خطا در ثبت آگهی: ' + error.message);
-                console.error('Error saving travel data:', error);
-            }
+    // نمایش تورها
+    async function loadTours() {
+      const tourAds = document.getElementById('tourAds');
+      tourAds.innerHTML = '';
+      try {
+        const querySnapshot = await getDocs(collection(db, "tours"));
+        querySnapshot.forEach((doc) => {
+          const tour = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${tour.tourName}</h3>
+            <p>نوع سفر: ${tour.tripType}</p>
+            <p>لیدر: ${tour.leaderName}</p>
+            <p>وسیله: ${tour.transport}</p>
+            <p>مبدا: ${tour.origin}</p>
+            <p>مقصد: ${tour.destination}</p>
+            <p>تاریخ رفت: ${tour.startDate}</p>
+            <p>تاریخ برگشت: ${tour.endDate}</p>
+            <p>ظرفیت: ${tour.capacity}</p>
+            <p>هزینه: ${tour.cost} تومان</p>
+            <p>هزینه اضافی: ${tour.extraCost} تومان</p>
+            <p>شماره کارت: ${tour.cardNumber}</p>
+            <p>به نام: ${tour.cardHolder}</p>
+            <p>تلفن: ${tour.phone}</p>
+            <p>توضیحات: ${tour.description}</p>
+          `;
+          tourAds.appendChild(card);
         });
+      } catch (error) {
+        console.error("خطا تو لود تورها:", error);
+      }
+    }
 
-        // ثبت ایونت
-        document.getElementById('submit-event').addEventListener('click', async () => {
-            if (!isFirebaseReady) {
-                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
-                return;
-            }
-
-            try {
-                const timestamp = new Date().toISOString();
-                const eventData = {
-                    title: document.getElementById('event-title').value,
-                    startDate: document.getElementById('event-date').value,
-                    endDate: document.getElementById('event-end-date').value,
-                    location: document.getElementById('event-location').value,
-                    capacity: document.getElementById('event-capacity').value,
-                    cost: document.getElementById('event-cost').value,
-                    description: document.getElementById('event-description').value,
-                    userId: userId,
-                    userName: userName,
-                    userAvatar: userAvatar,
-                    timestamp: timestamp,
-                    imageUrl: ''
-                };
-
-                await addDoc(collection(db, 'events'), eventData);
-                alert('ایونت ثبت شد!');
-                closeCurrentExpandedCard();
-                document.getElementById('event-form').reset();
-                loadEventAds();
-            } catch (error) {
-                alert('خطا در ثبت ایونت: ' + error.message);
-                console.error('Error saving event data:', error);
-            }
+    // نمایش ایونت‌ها
+    async function loadEvents() {
+      const eventAds = document.getElementById('eventAds');
+      eventAds.innerHTML = '';
+      try {
+        const querySnapshot = await getDocs(collection(db, "events"));
+        querySnapshot.forEach((doc) => {
+          const event = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${event.eventType}</h3>
+            <p>تاریخ شروع: ${event.startDate}</p>
+            <p>تاریخ پایان: ${event.endDate}</p>
+            <p>مکان: ${event.location}</p>
+            <p>ظرفیت: ${event.capacity}</p>
+            <p>هزینه: ${event.cost} تومان</p>
+            <p>توضیحات: ${event.description}</p>
+          `;
+          eventAds.appendChild(card);
         });
+      } catch (error) {
+        console.error("خطا تو لود ایونت‌ها:", error);
+      }
+    }
 
-        // ثبت محصول
-        document.getElementById('submit-shop').addEventListener('click', async () => {
-            if (!isFirebaseReady) {
-                alert('اتصال به سرور قطع است! لطفاً بعداً دوباره امتحان کنید.');
-                return;
-            }
-
-            const imageFile = document.getElementById('shop-image').files[0];
-            let imageUrl = '';
-
-            try {
-                if (imageFile) {
-                    imageUrl = await uploadImage(imageFile);
-                }
-
-                const timestamp = new Date().toISOString();
-                const shopData = {
-                    status: document.getElementById('shop-status').value,
-                    brand: document.getElementById('shop-brand').value,
-                    model: document.getElementById('shop-model').value,
-                    year: document.getElementById('shop-year').value,
-                    price: document.getElementById('shop-price').value,
-                    description: document.getElementById('shop-description').value,
-                    userId: userId,
-                    userName: userName,
-                    userAvatar: userAvatar,
-                    timestamp: timestamp,
-                    imageUrl: imageUrl
-                };
-
-                await addDoc(collection(db, 'shop'), shopData);
-                alert('محصول ثبت شد!');
-                closeCurrentExpandedCard();
-                document.getElementById('shop-form').reset();
-                loadShopAds();
-            } catch (error) {
-                alert('خطا در ثبت محصول: ' + error.message);
-                console.error('Error saving shop data:', error);
-            }
+    // نمایش محصولات فروشگاه
+    async function loadShopItems() {
+      const shopAds = document.getElementById('shopAds');
+      shopAds.innerHTML = '';
+      try {
+        const querySnapshot = await getDocs(collection(db, "shop"));
+        querySnapshot.forEach((doc) => {
+          const item = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${item.brand} ${item.model}</h3>
+            <p>وضعیت: ${item.condition}</p>
+            <p>سال تولید: ${item.productionYear}</p>
+            <p>قیمت: ${item.price} تومان</p>
+            <p>توضیحات: ${item.description}</p>
+          `;
+          shopAds.appendChild(card);
         });
+      } catch (error) {
+        console.error("خطا تو لود محصولات:", error);
+      }
+    }
 
-        // دکمه‌های پاک کردن
-        document.getElementById('reset-travel').addEventListener('click', () => {
-            document.getElementById('travel-form').reset();
-        });
-        document.getElementById('reset-event').addEventListener('click', () => {
-            document.getElementById('event-form').reset();
-        });
-        document.getElementById('reset-shop').addEventListener('click', () => {
-            document.getElementById('shop-form').reset();
-        });
-
-        // بارگذاری آگهی‌های تورها
-        async function loadTravelAds() {
-            const travelAdsList = document.getElementById('travel-ads-list');
-            travelAdsList.innerHTML = '';
-            try {
-                if (!db || !isFirebaseReady) {
-                    travelAdsList.innerHTML = '<p>اتصال به دیتابیس برقرار نیست. لطفاً دوباره امتحان کنید.</p>';
-                    return;
-                }
-                const q = query(collection(db, 'travels'), orderBy('timestamp', 'desc'));
-                const travelsSnapshot = await getDocs(q);
-                if (travelsSnapshot.empty) {
-                    travelAdsList.innerHTML = '<p>آگهی توری یافت نشد.</p>';
-                } else {
-                    travelsSnapshot.forEach((doc, index) => {
-                        const data = doc.data();
-                        const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-card';
-                        adDiv.id = `travel-ad-${index}`;
-                        adDiv.data = data;
-                        adDiv.type = 'travel';
-                        adDiv.imageUrl = data.imageUrl;
-                        adDiv.userId = data.userId;
-                        adDiv.userName = data.userName;
-                        adDiv.userAvatar = data.userAvatar;
-                        adDiv.innerHTML = `
-                            <div class="content">
-                                <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
-                                <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
-                                <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
-                                <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
-                            </div>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="expanded-content"></div>
-                        `;
-                        adDiv.onclick = () => toggleCard(adDiv);
-                        travelAdsList.appendChild(adDiv);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading travel ads:', error);
-                travelAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + (error.message || 'اتصال را بررسی کنید.') + '</p>';
-            }
-        }
-
-        // بارگذاری آگهی‌های ایونت
-        async function loadEventAds() {
-            const eventAdsList = document.getElementById('event-ads-list');
-            eventAdsList.innerHTML = '';
-            try {
-                if (!db || !isFirebaseReady) {
-                    eventAdsList.innerHTML = '<p>اتصال به دیتابیس برقرار نیست. لطفاً دوباره امتحان کنید.</p>';
-                    return;
-                }
-                const q = query(collection(db, 'events'), orderBy('timestamp', 'desc'));
-                const eventsSnapshot = await getDocs(q);
-                if (eventsSnapshot.empty) {
-                    eventAdsList.innerHTML = '<p>آگهی ایونتی یافت نشد.</p>';
-                } else {
-                    eventsSnapshot.forEach((doc, index) => {
-                        const data = doc.data();
-                        const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-card';
-                        adDiv.id = `event-ad-${index}`;
-                        adDiv.data = data;
-                        adDiv.type = 'event';
-                        adDiv.imageUrl = data.imageUrl;
-                        adDiv.userId = data.userId;
-                        adDiv.userName = data.userName;
-                        adDiv.userAvatar = data.userAvatar;
-                        adDiv.innerHTML = `
-                            <div class="content">
-                                <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
-                                <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
-                                <strong>مکان:</strong> ${data.location || 'نامشخص'}
-                            </div>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="expanded-content"></div>
-                        `;
-                        adDiv.onclick = () => toggleCard(adDiv);
-                        eventAdsList.appendChild(adDiv);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading event ads:', error);
-                eventAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + (error.message || 'اتصال را بررسی کنید.') + '</p>';
-            }
-        }
-
-        // بارگذاری آگهی‌های فروشگاه
-        async function loadShopAds() {
-            const shopAdsList = document.getElementById('shop-ads-list');
-            shopAdsList.innerHTML = '';
-            try {
-                if (!db || !isFirebaseReady) {
-                    shopAdsList.innerHTML = '<p>اتصال به دیتابیس برقرار نیست. لطفاً دوباره امتحان کنید.</p>';
-                    return;
-                }
-                const q = query(collection(db, 'shop'), orderBy('timestamp', 'desc'));
-                const shopSnapshot = await getDocs(q);
-                if (shopSnapshot.empty) {
-                    shopAdsList.innerHTML = '<p>آگهی فروشگاهی یافت نشد.</p>';
-                } else {
-                    shopSnapshot.forEach((doc, index) => {
-                        const data = doc.data();
-                        const adDiv = document.createElement('div');
-                        adDiv.className = 'ad-card';
-                        adDiv.id = `shop-ad-${index}`;
-                        adDiv.data = data;
-                        adDiv.type = 'shop';
-                        adDiv.imageUrl = data.imageUrl;
-                        adDiv.userId = data.userId;
-                        adDiv.userName = data.userName;
-                        adDiv.userAvatar = data.userAvatar;
-                        adDiv.innerHTML = `
-                            <div class="content">
-                                <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
-                                <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
-                                <strong>قیمت:</strong> ${data.price || 'نامشخص'}
-                            </div>
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="expanded-content"></div>
-                        `;
-                        adDiv.onclick = () => toggleCard(adDiv);
-                        shopAdsList.appendChild(adDiv);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading shop ads:', error);
-                shopAdsList.innerHTML = '<p>خطا در بارگذاری آگهی‌ها: ' + (error.message || 'اتصال را بررسی کنید.') + '</p>';
-            }
-        }
-    </script>
-</head>
-<body>
-    <h1>🧳 گروه دوستی‌ها</h1>
-    <div class="category">
-        <button onclick="toggleSection('event')">🫂 ایونت‌ها</button>
-        <button onclick="toggleSection('travel')">🏕️ تورها</button>
-        <button onclick="toggleSection('shop')">🛍️ فروشگاه</button>
-    </div>
-    <p class="slogan">دوستی‌ها از اینجا آغاز می‌شوند</p>
-    <div id="travel-form-card" class="form-card" style="display: none;">
-        <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
-            <div class="content">
-                <strong>📝 ثبت آگهی تور</strong>
-            </div>
-        </div>
-        <div class="form-content">
-            <h2>🏕️ ثبت آگهی تورها</h2>
-            <form id="travel-form">
-                <div class="form-group">
-                    <label>نام برگزارکننده (نام تور):</label>
-                    <input type="text" id="travel-organizer" placeholder="مثلاً: تور طبیعت گردی">
-                </div>
-                <div class="form-group">
-                    <label>نوع سفر:</label>
-                    <select id="travel-type">
-                        <option value="داخلی">داخلی</option>
-                        <option value="خارجی">خارجی</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>نام لیدر:</label>
-                    <input type="text" id="travel-leader" placeholder="مثلاً: علی اکبری">
-                </div>
-                <div class="form-group">
-                    <label>وسیله سفر:</label>
-                    <select id="travel-vehicle">
-                        <option value="خودرو شخصی">خودرو شخصی</option>
-                        <option value="اتوبوس">اتوبوس</option>
-                        <option value="هواپیما">هواپیما</option>
-                        <option value="هیچ‌هایک">هیچ‌هایک</option>
-                        <option value="سایر">سایر</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>مبدا:</label>
-                    <input type="text" id="travel-origin" placeholder="مثلاً: تهران">
-                </div>
-                <div class="form-group">
-                    <label>مقصد:</label>
-                    <input type="text" id="travel-destination" placeholder="مثلاً: شیراز">
-                </div>
-                <div class="form-group">
-                    <label>تاریخ رفت:</label>
-                    <input type="text" id="travel-departure" class="persian-date">
-                </div>
-                <div class="form-group">
-                    <label>تاریخ برگشت:</label>
-                    <input type="text" id="travel-return" class="persian-date">
-                </div>
-                <div class="form-group">
-                    <label>ظرفیت باقی‌مانده:</label>
-                    <input type="text" id="travel-capacity" placeholder="مثلاً: 4 نفر">
-                </div>
-                <div class="form-group">
-                    <label>هزینه:</label>
-                    <input type="text" id="travel-cost" placeholder="مثلاً: 1,000,000 تومان">
-                </div>
-                <div class="form-group">
-                    <label>هزینه اضافی:</label>
-                    <input type="text" id="travel-extra-cost" placeholder="دنگ خودرو/ ورودی ...">
-                </div>
-                <div class="form-group">
-                    <label>شماره کارت واریزی:</label>
-                    <input type="text" id="travel-card" placeholder="6037-6037-6037-6037">
-                </div>
-                <div class="form-group">
-                    <label>به نام:</label>
-                    <input type="text" id="travel-owner" placeholder="مثلاً: علی اکبری">
-                </div>
-                <div class="form-group">
-                    <label>تلفن هماهنگی:</label>
-                    <input type="text" id="travel-phone" placeholder="مثلاً: 09123456789">
-                </div>
-                <div class="form-group">
-                    <label>توضیحات بیشتر:</label>
-                    <textarea id="travel-description" placeholder="مثلاً: تور شامل صبحانه است..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>تصویر (اختیاری):</label>
-                    <input type="file" id="travel-image" accept="image/*">
-                </div>
-                <button type="button" id="submit-travel">✅ ثبت آگهی</button>
-                <button type="button" class="reset-button" id="reset-travel">🗑️ پاک کردن</button>
-            </form>
-        </div>
-    </div>
-    <div id="event-form-card" class="form-card" style="display: none;">
-        <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
-            <div class="content">
-                <strong>📝 ثبت آگهی ایونت</strong>
-            </div>
-        </div>
-        <div class="form-content">
-            <h2>🫂 ثبت آگهی ایونت</h2>
-            <form id="event-form">
-                <div class="form-group">
-                    <label>عنوان:</label>
-                    <select id="event-title">
-                        <option value="دورهمی">دورهمی (پیاده‌روی، کافه، پارک، سینما...)</option>
-                        <option value="ورزش">ورزش (کوه‌پیمایی، بدمینتون، دوچرخه‌سواری...)</option>
-                        <option value="کمپ و سفر">کمپ و سفر (داخلی، خارجی، آبشار، دشت...)</option>
-                        <option value="هم‌مسیر">هم‌مسیر (شیراز به اصفهان، ونک به صادقیه...)</option>
-                        <option value="دیوار دوستی">دیوار دوستی (واگذاری یخچال، کتاب...)</option>
-                        <option value="داوطلبانه">داوطلبانه (آموزش، مشورت...)</option>
-                        <option value="واگذاری">واگذاری (حیوان خانگی، بلیط...)</option>
-                        <option value="مشاوره و راهنمایی">مشاوره و راهنمایی (پزشکی، وام...)</option>
-                        <option value="متفرقه">متفرقه (استخدام، کسب و کار خانگی...)</option>
-                        <option value="سایر...">سایر...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>تاریخ شروع:</label>
-                    <input type="text" id="event-date" class="persian-date">
-                </div>
-                <div class="form-group">
-                    <label>تاریخ پایان:</label>
-                    <input type="text" id="event-end-date" class="persian-date">
-                </div>
-                <div class="form-group">
-                    <label>مکان:</label>
-                    <input type="text" id="event-location" placeholder="مثلاً: تهران، پارک ملت">
-                </div>
-                <div class="form-group">
-                    <label>ظرفیت:</label>
-                    <input type="text" id="event-capacity" placeholder="مثلاً: 50 نفر">
-                </div>
-                <div class="form-group">
-                    <label>هزینه:</label>
-                    <input type="text" id="event-cost" placeholder="مثلاً: 500,000 تومان">
-                </div>
-                <div class="form-group">
-                    <label>توضیح بیشتر:</label>
-                    <textarea id="event-description" placeholder="مثلاً: همراه با موسیقی..."></textarea>
-                </div>
-                <!-- فیلد تصویر غیرفعال شده -->
-                <!--
-                <div class="form-group">
-                    <label>تصویر (اختیاری):</label>
-                    <input type="file" id="event-image" accept="image/*">
-                </div>
-                -->
-                <button type="button" id="submit-event">✅ ثبت ایونت</button>
-                <button type="button" class="reset-button" id="reset-event">🗑️ پاک کردن</button>
-            </form>
-        </div>
-    </div>
-    <div id="shop-form-card" class="form-card" style="display: none;">
-        <div class="header">
-            <span class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">ثبت آگهی</span>
-            <div class="content">
-                <strong>📝 ثبت آگهی فروشگاه</strong>
-            </div>
-        </div>
-        <div class="form-content">
-            <h2>🛍️ ثبت آگهی فروشگاه</h2>
-            <form id="shop-form">
-                <div class="form-group">
-                    <label>وضعیت محصول:</label>
-                    <select id="shop-status">
-                        <option value="نو">نو</option>
-                        <option value="کارکرده">کارکرده</option>
-                        <option value="در حد نو">در حد نو</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>برند کالا:</label>
-                    <input type="text" id="shop-brand" placeholder="مثلاً: سامسونگ">
-                </div>
-                <div class="form-group">
-                    <label>مدل:</label>
-                    <input type="text" id="shop-model" placeholder="مثلاً: Galaxy S21">
-                </div>
-                <div class="form-group">
-                    <label>سال تولید:</label>
-                    <input type="text" id="shop-year" placeholder="مثلاً: 1399">
-                </div>
-                <div class="form-group">
-                    <label>قیمت:</label>
-                    <input type="text" id="shop-price" placeholder="مثلاً: 2,000,000 تومان">
-                </div>
-                <div class="form-group">
-                    <label>توضیحات بیشتر:</label>
-                    <textarea id="shop-description" placeholder="مثلاً: با گارانتی..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>تصویر (اختیاری):</label>
-                    <input type="file" id="shop-image" accept="image/*">
-                </div>
-                <button type="button" id="submit-shop">✅ ثبت محصول</button>
-                <button type="button" class="reset-button" id="reset-shop">🗑️ پاک کردن</button>
-            </form>
-        </div>
-    </div>
-    <div id="travel-ads">
-        <h2>🏕️ آگهی‌های تورها</h2>
-        <div id="travel-ads-list"></div>
-    </div>
-    <div id="event-ads">
-        <h2>🫂 آگهی‌های ایونت‌ها</h2>
-        <div id="event-ads-list"></div>
-    </div>
-    <div id="shop-ads">
-        <h2>🛍️ آگهی‌های فروشگاه</h2>
-        <div id="shop-ads-list"></div>
-    </div>
+    // لود همه آگهی‌ها موقع باز شدن صفحه
+    loadTours();
+    loadEvents();
+    loadShopItems();
+  </script>
 </body>
 </html>
