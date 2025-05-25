@@ -59,13 +59,16 @@
             text-align: right;
             transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
             overflow: hidden;
-            max-height: 100px; /* برای کارت‌های آگهی */
+            max-height: 100px;
             opacity: 1;
         }
         .form-card .header {
             display: flex;
-            justify-content: flex-start; /* دکمه به سمت چپ، عنوان به راست */
+            justify-content: space-between;
             align-items: center;
+        }
+        .form-card .header .toggle-button {
+            order: 1; /* دکمه به سمت چپ در RTL */
         }
         .ad-card .content {
             display: flex;
@@ -73,8 +76,8 @@
             justify-content: center;
             align-items: flex-end;
             font-size: 14px;
-            text-align: right;
-            direction: rtl;
+            text-align: right !important;
+            direction: rtl !important;
             margin: 0;
             padding: 10px;
             min-height: 50px;
@@ -88,8 +91,8 @@
         .ad-card .expanded-content {
             display: none;
             margin-top: 10px;
-            text-align: right;
-            direction: rtl;
+            text-align: right !important;
+            direction: rtl !important;
         }
         .form-card.expanded .form-content {
             display: block;
@@ -116,7 +119,6 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            margin-left: 10px; /* فاصله از عنوان */
         }
         .toggle-button:hover {
             background-color: #007399;
@@ -457,7 +459,7 @@
         let userId = userInfo.username || (userInfo.id ? String(userInfo.id) : null);
         if (!userId) {
             console.warn('User ID not found, using temporary ID');
-            userId = 'temp_user_' + Date.now(); // پیش‌فرض موقت اگه آیدی پیدا نشد
+            userId = 'temp_user_' + Date.now();
             alert('هشدار: آیدی کاربر تشخیص داده نشد. لطفاً دوباره وارد شوید.');
         }
         const userAvatar = userInfo.photo_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
@@ -746,7 +748,7 @@
         <div class="header">
             <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
-                <strong>📝 ثبت آگهی تور</strong>
+                <strong>ثبت آگهی تور</strong>
             </div>
         </div>
         <div class="form-content">
@@ -834,7 +836,7 @@
         <div class="header">
             <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
-                <strong>📝 ثبت آگهی ایونت</strong>
+                <strong>ثبت آگهی ایونت</strong>
             </div>
         </div>
         <div class="form-content">
@@ -879,13 +881,6 @@
                     <label>توضیح بیشتر:</label>
                     <textarea id="event-description" placeholder="مثلاً: همراه با موسیقی..."></textarea>
                 </div>
-                <!-- فیلد تصویر غیرفعال شده -->
-                <!--
-                <div class="form-group">
-                    <label>تصویر (اختیاری):</label>
-                    <input type="file" id="event-image" accept="image/*">
-                </div>
-                -->
                 <button type="button" id="submit-event">✅ ثبت ایونت</button>
                 <button type="button" class="reset-button" id="reset-event">🗑️ پاک کردن</button>
             </form>
@@ -895,7 +890,7 @@
         <div class="header">
             <button class="toggle-button" onclick="toggleCard(this.parentElement.parentElement)">باز کردن</button>
             <div class="content">
-                <strong>📝 ثبت آگهی فروشگاه</strong>
+                <strong>ثبت آگهی فروشگاه</strong>
             </div>
         </div>
         <div class="form-content">
