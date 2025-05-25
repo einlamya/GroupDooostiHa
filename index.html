@@ -67,17 +67,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .ad-card .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .form-card .content {
-            font-size: 14px;
-            text-align: right;
-            margin: 0;
-            padding: 10px 0;
-        }
         .ad-card .content {
             display: flex;
             flex-direction: column;
@@ -88,6 +77,12 @@
             margin: 0;
             padding: 10px;
             min-height: 50px; /* برای اطمینان از تراز عمودی */
+        }
+        .form-card .content {
+            font-size: 14px;
+            text-align: right;
+            margin: 0;
+            padding: 10px 0;
         }
         .form-card .form-content, .ad-card .expanded-content {
             display: none;
@@ -330,23 +325,18 @@
         // تابع برای بستن کارت باز قبلی
         function closeCurrentExpandedCard() {
             if (currentExpandedCard) {
-                const toggleButton = currentExpandedCard.querySelector('.toggle-button');
                 currentExpandedCard.classList.remove('expanded');
-                toggleButton.textContent = 'باز کردن';
                 currentExpandedCard = null;
             }
         }
 
         // تابع برای toggle کردن کارت‌ها
-        window.toggleCard = function(cardId, buttonId) {
-            const card = document.getElementById(cardId);
-            const toggleButton = document.getElementById(buttonId);
+        window.toggleCard = function(card) {
             const isExpanded = card.classList.contains('expanded');
 
             if (!isExpanded) {
                 closeCurrentExpandedCard();
                 card.classList.add('expanded');
-                toggleButton.textContent = 'بستن';
                 currentExpandedCard = card;
 
                 // پر کردن محتوای باز شده
@@ -396,7 +386,6 @@
                 }
             } else {
                 card.classList.remove('expanded');
-                toggleButton.textContent = 'باز کردن';
                 currentExpandedCard = null;
             }
         };
@@ -456,7 +445,14 @@
 
         // گرفتن اطلاعات کاربر
         userInfo = tg?.initDataUnsafe.user || {};
-        const userAvatar = userInfo && userInfo.photo_url ? userInfo.photo_url : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        let userId = userInfo.username || (userInfo.id ? String(userInfo.id) : null);
+        if (!userId) {
+            console.warn('User ID not found, using temporary ID');
+            userId = 'temp_user_' + Date.now(); // پیش‌فرض موقت اگه آیدی پیدا نشد
+            alert('هشدار: آیدی کاربر تشخیص داده نشد. لطفاً دوباره وارد شوید.');
+        }
+        const userAvatar = userInfo.photo_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const userName = userInfo.first_name || 'آگهی‌دهنده';
 
         // ثبت آگهی تورها
         document.getElementById('submit-travel').addEventListener('click', async () => {
@@ -490,8 +486,8 @@
                     owner: document.getElementById('travel-owner').value,
                     phone: document.getElementById('travel-phone').value,
                     description: document.getElementById('travel-description').value,
-                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userId: userId,
+                    userName: userName,
                     userAvatar: userAvatar,
                     timestamp: timestamp,
                     imageUrl: imageUrl
@@ -525,8 +521,8 @@
                     capacity: document.getElementById('event-capacity').value,
                     cost: document.getElementById('event-cost').value,
                     description: document.getElementById('event-description').value,
-                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userId: userId,
+                    userName: userName,
                     userAvatar: userAvatar,
                     timestamp: timestamp,
                     imageUrl: ''
@@ -566,8 +562,8 @@
                     year: document.getElementById('shop-year').value,
                     price: document.getElementById('shop-price').value,
                     description: document.getElementById('shop-description').value,
-                    userId: userInfo && (userInfo.username || userInfo.id) ? (userInfo.username || String(userInfo.id)) : 'unknown',
-                    userName: userInfo && userInfo.first_name ? userInfo.first_name : 'آگهی‌دهنده',
+                    userId: userId,
+                    userName: userName,
                     userAvatar: userAvatar,
                     timestamp: timestamp,
                     imageUrl: imageUrl
@@ -621,18 +617,16 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            <div class="header">
-                                <button id="travel-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('travel-ad-${index}', 'travel-ad-toggle-${index}')">باز کردن</button>
-                                <div class="content">
-                                    <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
-                                    <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
-                                    <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
-                                    <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
-                                </div>
+                            <div class="content">
+                                <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
+                                <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
+                                <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
+                                <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
                             </div>
                             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
+                        adDiv.onclick = () => toggleCard(adDiv);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -668,17 +662,15 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            <div class="header">
-                                <button id="event-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('event-ad-${index}', 'event-ad-toggle-${index}')">باز کردن</button>
-                                <div class="content">
-                                    <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
-                                    <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
-                                    <strong>مکان:</strong> ${data.location || 'نامشخص'}
-                                </div>
+                            <div class="content">
+                                <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
+                                <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
+                                <strong>مکان:</strong> ${data.location || 'نامشخص'}
                             </div>
                             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
+                        adDiv.onclick = () => toggleCard(adDiv);
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -714,17 +706,15 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            <div class="header">
-                                <button id="shop-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('shop-ad-${index}', 'shop-ad-toggle-${index}')">باز کردن</button>
-                                <div class="content">
-                                    <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
-                                    <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
-                                    <strong>قیمت:</strong> ${data.price || 'نامشخص'}
-                                </div>
+                            <div class="content">
+                                <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
+                                <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
+                                <strong>قیمت:</strong> ${data.price || 'نامشخص'}
                             </div>
                             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
+                        adDiv.onclick = () => toggleCard(adDiv);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
