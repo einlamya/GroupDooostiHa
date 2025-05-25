@@ -59,10 +59,15 @@
             text-align: right;
             transition: max-height 0.5s ease-in-out, opacity 0.3s ease;
             overflow: hidden;
-            max-height: 60px;
+            max-height: 100px; /* برای کارت‌های آگهی */
             opacity: 1;
         }
         .form-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ad-card .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -74,11 +79,15 @@
             padding: 10px 0;
         }
         .ad-card .content {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* وسط‌چین عمودی */
+            align-items: flex-end; /* راست‌چین */
             font-size: 14px;
             text-align: right;
-            margin: 0 auto;
+            margin: 0;
             padding: 10px;
+            min-height: 50px; /* برای اطمینان از تراز عمودی */
         }
         .form-card .form-content, .ad-card .expanded-content {
             display: none;
@@ -91,7 +100,15 @@
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
             overflow-y: auto; /* اسکرول عمودی */
         }
+        .ad-card.expanded {
+            max-height: 600px; /* برای کارت‌های آگهی */
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
         .form-card.expanded .form-content {
+            display: block;
+        }
+        .ad-card.expanded .expanded-content {
             display: block;
         }
         .toggle-button {
@@ -331,6 +348,52 @@
                 card.classList.add('expanded');
                 toggleButton.textContent = 'بستن';
                 currentExpandedCard = card;
+
+                // پر کردن محتوای باز شده
+                const expandedContent = card.querySelector('.expanded-content');
+                const data = card.data;
+                if (card.type === 'travel') {
+                    expandedContent.innerHTML = `
+                        <strong>نوع سفر:</strong> ${data.type || 'نامشخص'}<br>
+                        <strong>لیدر:</strong> ${data.leader || 'نامشخص'}<br>
+                        <strong>وسیله:</strong> ${data.vehicle || 'نامشخص'}<br>
+                        <strong>مبدا:</strong> ${data.origin || 'نامشخص'}<br>
+                        <strong>تاریخ برگشت:</strong> ${data.return || 'نامشخص'}<br>
+                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                        <strong>هزینه اضافی:</strong> ${data.extraCost || 'نامشخص'}<br>
+                        <strong>شماره کارت:</strong> ${data.card || 'نامشخص'}<br>
+                        <strong>به نام:</strong> ${data.owner || 'نامشخص'}<br>
+                        <strong>تلفن:</strong> ${data.phone || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                } else if (card.type === 'event') {
+                    expandedContent.innerHTML = `
+                        <strong>تاریخ پایان:</strong> ${data.endDate || 'نامشخص'}<br>
+                        <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}<br>
+                        <strong>هزینه:</strong> ${data.cost || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                } else if (card.type === 'shop') {
+                    expandedContent.innerHTML = `
+                        <strong>مدل:</strong> ${data.model || 'نامشخص'}<br>
+                        <strong>سال تولید:</strong> ${data.year || 'نامشخص'}<br>
+                        <strong>توضیحات:</strong> ${data.description || 'نامشخص'}<br>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="expanded-img" alt="تصویر آگهی">` : ''}
+                        <div class="contact-link">
+                            <img src="${data.userAvatar}" alt="آواتار">
+                            <a href="https://t.me/${data.userId}" target="_blank">${data.userName}</a>
+                        </div>
+                    `;
+                }
             } else {
                 card.classList.remove('expanded');
                 toggleButton.textContent = 'باز کردن';
@@ -379,8 +442,8 @@
                 return url;
             } catch (error) {
                 console.error('Error uploading image:', error);
-                alert('خطا در آپلود تصویر: ' + error.message);
-                return '';
+                alert('خطا در آپلود تصویر: ' + error.message + ' (آگهی بدون تصویر ثبت می‌شود)');
+                return ''; // ادامه ثبت آگهی حتی اگه تصویر آپلود نشه
             }
         }
 
@@ -546,10 +609,11 @@
                 if (travelsSnapshot.empty) {
                     travelAdsList.innerHTML = '<p>آگهی توری یافت نشد.</p>';
                 } else {
-                    travelsSnapshot.forEach(doc => {
+                    travelsSnapshot.forEach((doc, index) => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.id = `travel-ad-${index}`;
                         adDiv.data = data;
                         adDiv.type = 'travel';
                         adDiv.imageUrl = data.imageUrl;
@@ -557,16 +621,18 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="content">
-                                <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
-                                <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
-                                <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
-                                <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
+                            <div class="header">
+                                <button id="travel-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('travel-ad-${index}', 'travel-ad-toggle-${index}')">باز کردن</button>
+                                <div class="content">
+                                    <strong>تور:</strong> ${data.organizer || 'نامشخص'}<br>
+                                    <strong>مقصد:</strong> ${data.destination || 'نامشخص'}<br>
+                                    <strong>تاریخ:</strong> ${data.departure || 'نامشخص'}<br>
+                                    <strong>ظرفیت:</strong> ${data.capacity || 'نامشخص'}
+                                </div>
                             </div>
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv);
                         travelAdsList.appendChild(adDiv);
                     });
                 }
@@ -590,10 +656,11 @@
                 if (eventsSnapshot.empty) {
                     eventAdsList.innerHTML = '<p>آگهی ایونتی یافت نشد.</p>';
                 } else {
-                    eventsSnapshot.forEach(doc => {
+                    eventsSnapshot.forEach((doc, index) => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.id = `event-ad-${index}`;
                         adDiv.data = data;
                         adDiv.type = 'event';
                         adDiv.imageUrl = data.imageUrl;
@@ -601,15 +668,17 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="content">
-                                <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
-                                <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
-                                <strong>مکان:</strong> ${data.location || 'نامشخص'}
+                            <div class="header">
+                                <button id="event-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('event-ad-${index}', 'event-ad-toggle-${index}')">باز کردن</button>
+                                <div class="content">
+                                    <strong>عنوان:</strong> ${data.title || 'نامشخص'}<br>
+                                    <strong>تاریخ شروع:</strong> ${data.startDate || 'نامشخص'}<br>
+                                    <strong>مکان:</strong> ${data.location || 'نامشخص'}
+                                </div>
                             </div>
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv);
                         eventAdsList.appendChild(adDiv);
                     });
                 }
@@ -633,10 +702,11 @@
                 if (shopSnapshot.empty) {
                     shopAdsList.innerHTML = '<p>آگهی فروشگاهی یافت نشد.</p>';
                 } else {
-                    shopSnapshot.forEach(doc => {
+                    shopSnapshot.forEach((doc, index) => {
                         const data = doc.data();
                         const adDiv = document.createElement('div');
                         adDiv.className = 'ad-card';
+                        adDiv.id = `shop-ad-${index}`;
                         adDiv.data = data;
                         adDiv.type = 'shop';
                         adDiv.imageUrl = data.imageUrl;
@@ -644,15 +714,17 @@
                         adDiv.userName = data.userName;
                         adDiv.userAvatar = data.userAvatar;
                         adDiv.innerHTML = `
-                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
-                            <div class="content">
-                                <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
-                                <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
-                                <strong>قیمت:</strong> ${data.price || 'نامشخص'}
+                            <div class="header">
+                                <button id="shop-ad-toggle-${index}" class="toggle-button" onclick="toggleCard('shop-ad-${index}', 'shop-ad-toggle-${index}')">باز کردن</button>
+                                <div class="content">
+                                    <strong>برند:</strong> ${data.brand || 'نامشخص'}<br>
+                                    <strong>وضعیت:</strong> ${data.status || 'نامشخص'}<br>
+                                    <strong>قیمت:</strong> ${data.price || 'نامشخص'}
+                                </div>
                             </div>
+                            ${data.imageUrl ? `<img src="${data.imageUrl}" alt="تصویر آگهی">` : ''}
                             <div class="expanded-content"></div>
                         `;
-                        adDiv.onclick = () => toggleCard(adDiv);
                         shopAdsList.appendChild(adDiv);
                     });
                 }
